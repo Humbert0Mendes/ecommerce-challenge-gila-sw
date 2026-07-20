@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: product-order-api
+  profiles:
+    default: dev
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8081/realms/product-order}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8081/realms/product-order/protocol/openid-connect/certs}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  security:
+    audience: ${JWT_AUDIENCE:product-order-api}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

@@ -1,0 +1,133 @@
+{
+  "info": {
+    "_postman_id": "0f40a5ca-fd59-4e9d-8244-d2e06e070b84",
+    "name": "Product Order API",
+    "description": "Collection para validar a API de produtos e pedidos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "jwt", "value": "COLE_SEU_JWT_AQUI" },
+    { "key": "productId", "value": "1" },
+    { "key": "orderId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": { "method": "GET", "url": "{{baseUrl}}/actuator/health" },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create product",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{jwt}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Mouse sem fio\",\n  \"sku\": \"MOUSE-001\",\n  \"description\": \"Mouse óptico sem fio\",\n  \"category\": \"Periféricos\",\n  \"price\": 99.90,\n  \"stock\": 10,\n  \"weightKg\": 0.120\n}" },
+            "url": "{{baseUrl}}/api/v1/products"
+          },
+          "response": []
+        },
+        {
+          "name": "List products",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{jwt}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/products?page=0&size=20&sort=name,asc"
+          },
+          "response": []
+        },
+        {
+          "name": "Get product",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{jwt}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/products/{{productId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update product",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{jwt}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Mouse sem fio atualizado\",\n  \"sku\": \"MOUSE-001\",\n  \"description\": \"Mouse óptico sem fio, versão atualizada\",\n  \"category\": \"Periféricos\",\n  \"price\": 109.90,\n  \"stock\": 15,\n  \"weightKg\": 0.120\n}" },
+            "url": "{{baseUrl}}/api/v1/products/{{productId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Search products",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{jwt}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/products/search?q=mouse&page=0&size=20"
+          },
+          "response": []
+        },
+        {
+          "name": "Import CSV",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{jwt}}", "type": "string" }] },
+            "method": "POST",
+            "body": { "mode": "formdata", "formdata": [{ "key": "file", "type": "file", "src": "", "disabled": false }] },
+            "url": "{{baseUrl}}/api/v1/products/import"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete product",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{jwt}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/products/{{productId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create order",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{jwt}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"items\": [\n    { \"productId\": {{productId}}, \"quantity\": 2 }\n  ]\n}" },
+            "url": "{{baseUrl}}/api/v1/orders"
+          },
+          "response": []
+        },
+        {
+          "name": "List orders",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{jwt}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/orders?page=0&size=20"
+          },
+          "response": []
+        },
+        {
+          "name": "Get order",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{jwt}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/orders/{{orderId}}"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
