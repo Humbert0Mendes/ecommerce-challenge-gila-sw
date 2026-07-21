@@ -54,3 +54,5 @@ mvn verify -Pintegration
 - `GET /api/v1/products` accepts the optional filters `name`, `sku`, `category`, `minPrice`, `maxPrice`, `minWeight`, and `maxWeight`
 - `POST /api/v1/products/import` (`multipart/form-data`, `file` part)
 - `POST`, `GET`, and `GET /{id}` for `/api/v1/orders` (`POST` requires `Idempotency-Key`)
+
+The example CSV file provided for the challenge was downloaded on July 18, 2026.
