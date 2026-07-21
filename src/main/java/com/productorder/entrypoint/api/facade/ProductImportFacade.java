@@ -22,12 +22,13 @@ public class ProductImportFacade {
     }
 
     public ImportResponse importFile(MultipartFile file) {
-        if (file.isEmpty()) throw new IllegalArgumentException("Arquivo CSV vazio");
+        if (file.isEmpty()) throw new IllegalArgumentException("CSV file is empty");
         try {
             var csvParsed = parser.parse(file.getInputStream());
-            return response(useCase.importProducts(csvParsed));
+            var importedProducts = useCase.importProducts(csvParsed);
+            return response(importedProducts);
         } catch (IOException exception) {
-            throw new IllegalArgumentException("Não foi possível ler o CSV");
+            throw new IllegalArgumentException("Was not able to read CSV file", exception);
         }
     }
 

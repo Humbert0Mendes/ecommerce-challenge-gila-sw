@@ -11,19 +11,23 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProductCsvParser {
     private static final List<String> HEADERS = List.of("name", "sku", "description", "category", "price", "stock", "weight_kg");
+    private static final Logger log = LoggerFactory.getLogger(ProductCsvParser.class);
 
     public List<ProductImportRow> parse(InputStream input) {
         try (CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).setTrim(true).get().parse(new InputStreamReader(input, StandardCharsets.UTF_8))) {
             if (!parser.getHeaderMap().keySet().containsAll(HEADERS))
-                throw new IllegalArgumentException("Cabeçalho CSV inválido");
+                throw new IllegalArgumentException("Invalid CSV Header");
             return parser.stream().filter(record -> !record.stream().allMatch(String::isBlank)).map(this::row).toList();
         } catch (IOException exception) {
-            throw new IllegalArgumentException("Não foi possível ler o CSV");
+            log.error(exception.getMessage(), exception);
+            throw new IllegalArgumentException("Was not able to parse CSV file", exception);
         }
     }
 
