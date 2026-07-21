@@ -31,7 +31,8 @@ public class OrderUseCase extends AbstractOrderUseCase {
     }
 
     public OrderDomain create(OrderDomain order, OrderIdempotencyDomain idempotency) {
-        return idempotencyGateway.execute(idempotency, fingerprint(order), () -> processPayment(order));
+        return idempotencyGateway.execute(idempotency, fingerprint(order),
+                () -> processPayment(order));
     }
 
     @Transactional(readOnly = true)

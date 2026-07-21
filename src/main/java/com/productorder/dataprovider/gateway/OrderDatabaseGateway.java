@@ -27,8 +27,14 @@ public class OrderDatabaseGateway implements OrderGateway {
         this.mapper = mapper;
     }
 
-    public OrderDomain save(OrderDomain orderDomain) {
-        return mapper.toDomain(orders.save(mapper.toEntity(orderDomain, products::getReferenceById)));
+    public OrderDomain create(OrderDomain orderDomain) {
+        var entity = mapper.toEntity(orderDomain, products::getReferenceById);
+        return mapper.toDomain(orders.save(entity));
+    }
+
+    public OrderDomain update(OrderDomain orderDomain) {
+        orders.updateStatus(orderDomain.getId(), orderDomain.getStatus());
+        return orderDomain;
     }
 
     public Optional<OrderDomain> findById(Long id) {

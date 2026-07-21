@@ -86,7 +86,7 @@ class ProductUseCaseTest {
 
         assertThatThrownBy(() -> useCase.get(1L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Produto not found");
+                .hasMessage("Product with id 1 not found");
     }
 
     @Test

@@ -40,7 +40,7 @@ public class ProductFacade {
 
     public PageResponse<ProductResponse> list(String name, String sku, String category, BigDecimal minPrice, BigDecimal maxPrice,
                                       BigDecimal minWeight, BigDecimal maxWeight, Pageable pageable) {
-        ProductFilterDomain filter = buildProductFilterDomain(name, sku, category, minPrice, maxPrice, minWeight, maxWeight);
+        var filter = buildProductFilterDomain(name, sku, category, minPrice, maxPrice, minWeight, maxWeight);
         return responsePage(useCase.list(filter, page(pageable)));
     }
 

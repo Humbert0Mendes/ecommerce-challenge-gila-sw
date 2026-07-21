@@ -3,7 +3,6 @@ package com.productorder.core.usecase.order;
 import com.productorder.core.domain.order.OrderDomain;
 import com.productorder.core.domain.order.OrderItemDomain;
 import com.productorder.core.domain.order.OrderStatusEnum;
-import com.productorder.core.domain.product.ProductDomain;
 import com.productorder.core.exception.BusinessRuleException;
 import com.productorder.core.exception.NotFoundException;
 import com.productorder.core.gateway.OrderGateway;
@@ -27,38 +26,38 @@ public class OrderPaymentProcessor extends AbstractOrderUseCase {
     public OrderDomain createAndReserve(OrderDomain draft) {
         Map<Long, Integer> quantities = new LinkedHashMap<>();
         draft.getItems().forEach(item -> quantities.merge(item.productId(), item.quantity(), Integer::sum));
-        OrderDomain order = OrderDomain.created();
+        var order = OrderDomain.created();
         quantities.forEach((productId, quantity) -> reserveProduct(order, productId, quantity));
-        return orders.save(order);
+        return orders.create(order);
     }
 
     @Transactional
     public OrderDomain startProcessing(Long orderId) {
-        OrderDomain order = order(orderId);
+        var order = order(orderId);
         order.startProcessing();
-        return orders.save(order);
+        return orders.update(order);
     }
 
     @Transactional
     public OrderDomain confirm(Long orderId) {
-        OrderDomain order = order(orderId);
+        var order = order(orderId);
         order.confirm();
-        return orders.save(order);
+        return orders.update(order);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void declineAndRestore(Long orderId) {
-        OrderDomain order = order(orderId);
+        var order = order(orderId);
         if (order.getStatus() == OrderStatusEnum.DECLINED) {
             return;
         }
         order.getItems().forEach(this::restoreProduct);
         order.decline();
-        orders.save(order);
+        orders.update(order);
     }
 
     private void reserveProduct(OrderDomain order, Long productId, int quantity) {
-        ProductDomain product = products.findActiveByIdForUpdate(productId).orElseThrow(() -> new NotFoundException("Product with id " + productId));
+        var product = products.findActiveByIdForUpdate(productId).orElseThrow(() -> new NotFoundException("Product with id " + productId));
         if (product.getStock() < quantity) {
             throw new BusinessRuleException("Stock insufficient");
         }
@@ -68,7 +67,7 @@ public class OrderPaymentProcessor extends AbstractOrderUseCase {
     }
 
     private void restoreProduct(OrderItemDomain item) {
-        ProductDomain product = products.findByIdForUpdate(item.productId()).orElseThrow(() -> new NotFoundException("Product with id " + item.productId()));
+        var product = products.findByIdForUpdate(item.productId()).orElseThrow(() -> new NotFoundException("Product with id " + item.productId()));
         product.increaseStock(item.quantity());
         products.save(product);
     }

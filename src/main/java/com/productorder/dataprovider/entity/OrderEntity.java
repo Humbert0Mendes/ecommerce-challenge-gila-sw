@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +29,17 @@ public class OrderEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatusEnum status;
+    @Column(name = "total_price", nullable = false, precision = 12, scale = 2)
+    private BigDecimal totalPrice;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemEntity> items = new ArrayList<>();
 
     protected OrderEntity() {
     }
 
-    public OrderEntity(OrderStatusEnum status) {
+    public OrderEntity(OrderStatusEnum status, BigDecimal totalPrice) {
         this.status = status;
+        this.totalPrice = totalPrice;
     }
 
     public void addItem(OrderItemEntity item) {
@@ -53,6 +57,10 @@ public class OrderEntity {
 
     public OrderStatusEnum getStatus() {
         return status;
+    }
+
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
     }
 
     public List<OrderItemEntity> getItems() {

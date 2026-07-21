@@ -34,7 +34,7 @@ public class ProductUseCase extends AbstractProductUseCase {
 
     @Transactional(readOnly = true)
     public ProductDomain get(Long id) {
-        return active(id);
+        return findProductById(id);
     }
 
     @Transactional(readOnly = true)
@@ -45,20 +45,20 @@ public class ProductUseCase extends AbstractProductUseCase {
     @Transactional
     public ProductDomain update(Long id, ProductDomain product) {
         validateProductData(product);
-        ProductDomain existing = active(id);
+        ProductDomain existing = findProductById(id);
         existing.update(product.getName(), product.getSku(), product.getDescription(), product.getCategory(), product.getPrice(), product.getStock(), product.getWeightKg());
         return products.save(existing);
     }
 
     @Transactional
     public void delete(Long id) {
-        ProductDomain product = active(id);
+        ProductDomain product = findProductById(id);
         product.deactivate();
         products.save(product);
     }
 
-    public ProductDomain active(Long id) {
-        return products.findActiveById(id).orElseThrow(() -> new NotFoundException("Produto"));
+    public ProductDomain findProductById(Long id) {
+        return products.findActiveById(id).orElseThrow(() -> new NotFoundException("Product with id " + id));
     }
 
     public ProductImportResult importProducts(List<ProductImportRow> rows) {

@@ -49,7 +49,7 @@ class OrderPaymentProcessorTest {
         ProductDomain product = product(3);
         OrderDomain draft = new OrderDomain(null, null, OrderStatusEnum.CREATED, List.of(new OrderItemDomain(1L, 2, null)));
         when(products.findActiveByIdForUpdate(1L)).thenReturn(Optional.of(product));
-        when(orders.save(any(OrderDomain.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(orders.create(any(OrderDomain.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         OrderDomain created = processor.createAndReserve(draft);
 
@@ -71,7 +71,7 @@ class OrderPaymentProcessorTest {
         assertThat(product.getStock()).isEqualTo(10);
         assertThat(processing.getStatus()).isEqualTo(OrderStatusEnum.DECLINED);
         verify(products).save(product);
-        verify(orders).save(orderCaptor.capture());
+        verify(orders).update(orderCaptor.capture());
         assertThat(orderCaptor.getValue()).isSameAs(processing);
     }
 
@@ -79,14 +79,14 @@ class OrderPaymentProcessorTest {
     void shouldUpdateOrderToProcessingAndConfirmed() {
         OrderDomain order = OrderDomain.created();
         when(orders.findById(1L)).thenReturn(Optional.of(order));
-        when(orders.save(any(OrderDomain.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(orders.update(any(OrderDomain.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         OrderDomain processing = processor.startProcessing(1L);
         assertThat(processing.getStatus()).isEqualTo(OrderStatusEnum.PROCESSING);
 
         OrderDomain confirmed = processor.confirm(1L);
         assertThat(confirmed.getStatus()).isEqualTo(OrderStatusEnum.CONFIRMED);
-        verify(orders, times(2)).save(order);
+        verify(orders, times(2)).update(order);
     }
 
     @Test

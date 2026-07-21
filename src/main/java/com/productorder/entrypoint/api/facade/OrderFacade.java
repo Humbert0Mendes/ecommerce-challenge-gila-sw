@@ -22,7 +22,7 @@ public class OrderFacade {
     }
 
     public OrderResponse create(OrderCreateRequest request, String idempotencyKey, String subject) {
-        OrderDomain draft = OrderDomain.created();
+        var draft = OrderDomain.created();
         request.items().forEach(item -> draft.addItem(new OrderItemDomain(item.productId(), item.quantity(), null)));
         return OrderResponse.from(useCase.create(draft, new OrderIdempotencyDomain(subject, idempotencyKey)));
     }

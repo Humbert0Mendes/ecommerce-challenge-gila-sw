@@ -33,7 +33,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponse> create(@RequestHeader("Idempotency-Key") @NotBlank String idempotencyKey, Authentication authentication, @Valid @RequestBody OrderCreateRequest request) {
-        OrderResponse response = facade.create(request, idempotencyKey, authentication.getName());
+        var response = facade.create(request, idempotencyKey, authentication.getName());
         return ResponseEntity.created(URI.create("/api/v1/orders/" + response.id())).body(response);
     }
 

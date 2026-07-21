@@ -77,7 +77,7 @@ class DatabaseGatewayIT {
         OrderDomain draft = OrderDomain.created();
         draft.addItem(new OrderItemDomain(product.getId(), 2, product.getPrice()));
 
-        OrderDomain saved = orders.save(draft);
+        OrderDomain saved = orders.create(draft);
         OrderDomain found = orders.findById(saved.getId()).orElseThrow();
         PageResult<OrderDomain> page = orders.findAll(new PageQuery(0, 20, "createdAt", "DESC"));
 

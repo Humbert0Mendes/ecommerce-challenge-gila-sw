@@ -16,9 +16,10 @@ public class OrderEntityMapper {
     }
 
     public OrderEntity toEntity(OrderDomain orderDomain, java.util.function.Function<Long, ProductEntity> product) {
-        OrderEntity orderEntity = new OrderEntity(orderDomain.getStatus());
+        OrderEntity orderEntity = new OrderEntity(orderDomain.getStatus(), orderDomain.total());
         orderDomain.getItems().forEach(i
                 -> orderEntity.addItem(new OrderItemEntity(product.apply(i.productId()), i.quantity(), i.unitPrice())));
         return orderEntity;
     }
+
 }

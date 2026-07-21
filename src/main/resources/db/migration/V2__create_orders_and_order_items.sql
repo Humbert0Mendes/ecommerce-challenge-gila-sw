@@ -1,8 +1,9 @@
 CREATE TABLE orders (
     id          BIGSERIAL    PRIMARY KEY,
     created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status      VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
-    CONSTRAINT chk_orders_status CHECK (status IN ('PENDING', 'CONFIRMED', 'CANCELLED'))
+    status      VARCHAR(20)  NOT NULL DEFAULT 'CREATED',
+    total_price NUMERIC(12, 2) NOT NULL,
+    CONSTRAINT chk_orders_status CHECK (status IN ('CREATED', 'PROCESSING', 'CONFIRMED', 'DECLINED'))
 );
 
 CREATE TABLE order_items (
