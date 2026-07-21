@@ -2,7 +2,7 @@ package com.productorder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.productorder.product.persistence.ProductRepository;
+import com.productorder.dataprovider.repository.ProductJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,7 +25,7 @@ class ProductOrderApiApplicationIT {
         registry.add("spring.datasource.password", postgres::getPassword);
     }
 
-    @Autowired ProductRepository products;
+    @Autowired ProductJpaRepository products;
 
     @Test
     void contextStartsWithFlywaySchema() {
