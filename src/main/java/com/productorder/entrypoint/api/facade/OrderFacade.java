@@ -1,6 +1,7 @@
 package com.productorder.entrypoint.api.facade;
 
 import com.productorder.core.domain.order.OrderDomain;
+import com.productorder.core.domain.order.OrderIdempotencyDomain;
 import com.productorder.core.domain.order.OrderItemDomain;
 import com.productorder.core.gateway.PageQuery;
 import com.productorder.core.gateway.PageResult;
@@ -21,10 +22,10 @@ public class OrderFacade {
         this.useCase = useCase;
     }
 
-    public OrderResponse create(OrderCreateRequest request) {
-        OrderDomain draft = OrderDomain.pending();
+    public OrderResponse create(OrderCreateRequest request, String idempotencyKey, String subject) {
+        OrderDomain draft = OrderDomain.created();
         request.items().forEach(item -> draft.addItem(new OrderItemDomain(item.productId(), item.quantity(), null)));
-        return OrderResponse.from(useCase.create(draft));
+        return OrderResponse.from(useCase.create(draft, new OrderIdempotencyDomain(subject, idempotencyKey)));
     }
 
     public OrderResponse get(Long id) {

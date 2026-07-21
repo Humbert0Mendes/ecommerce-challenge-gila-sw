@@ -19,12 +19,24 @@ public class OrderDomain {
         this.items = new ArrayList<>(items);
     }
 
-    public static OrderDomain pending() {
-        return new OrderDomain(null, null, OrderStatusEnum.PENDING, List.of());
+    public static OrderDomain created() {
+        return new OrderDomain(null, null, OrderStatusEnum.CREATED, List.of());
     }
 
     public void addItem(OrderItemDomain item) {
         items.add(item);
+    }
+
+    public void startProcessing() {
+        status = OrderStatusEnum.PROCESSING;
+    }
+
+    public void confirm() {
+        status = OrderStatusEnum.CONFIRMED;
+    }
+
+    public void decline() {
+        status = OrderStatusEnum.DECLINED;
     }
 
     public Long getId() {

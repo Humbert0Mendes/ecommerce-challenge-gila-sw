@@ -1,6 +1,7 @@
 package com.productorder.core.usecase.product;
 
 import com.productorder.core.domain.product.ProductDomain;
+import com.productorder.core.domain.product.ProductFilterDomain;
 import com.productorder.core.domain.product.ProductImportIssue;
 import com.productorder.core.domain.product.ProductImportResult;
 import com.productorder.core.domain.product.ProductImportRow;
@@ -37,13 +38,8 @@ public class ProductUseCase extends AbstractProductUseCase {
     }
 
     @Transactional(readOnly = true)
-    public PageResult<ProductDomain> list(PageQuery page) {
-        return products.findActive(page);
-    }
-
-    @Transactional(readOnly = true)
-    public PageResult<ProductDomain> search(String query, PageQuery page) {
-        return products.searchActive(query, page);
+    public PageResult<ProductDomain> list(ProductFilterDomain filter, PageQuery page) {
+        return products.findActive(filter, page);
     }
 
     @Transactional

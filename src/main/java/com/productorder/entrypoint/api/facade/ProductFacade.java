@@ -1,11 +1,16 @@
 package com.productorder.entrypoint.api.facade;
 
 import com.productorder.core.domain.product.ProductDomain;
+import com.productorder.core.domain.product.ProductFilterDomain;
 import com.productorder.core.gateway.PageQuery;
 import com.productorder.core.gateway.PageResult;
 import com.productorder.core.usecase.product.ProductUseCase;
 import com.productorder.entrypoint.api.dto.product.ProductRequest;
 import com.productorder.entrypoint.api.dto.product.ProductResponse;
+
+import java.math.BigDecimal;
+
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -35,16 +40,24 @@ public class ProductFacade {
         useCase.delete(id);
     }
 
-    public Page<ProductResponse> list(Pageable pageable) {
-        return responsePage(useCase.list(page(pageable)));
+    public Page<ProductResponse> list(String name, String sku, String category, BigDecimal minPrice, BigDecimal maxPrice,
+                                      BigDecimal minWeight, BigDecimal maxWeight, Pageable pageable) {
+        ProductFilterDomain filter = buildProductFilterDomain(name, sku, category, minPrice, maxPrice, minWeight, maxWeight);
+        return responsePage(useCase.list(filter, page(pageable)));
     }
 
-    public Page<ProductResponse> search(String query, Pageable pageable) {
-        return responsePage(useCase.search(query, page(pageable)));
+    private @NonNull ProductFilterDomain buildProductFilterDomain(String name, String sku, String category,
+                                                                  BigDecimal minPrice, BigDecimal maxPrice, BigDecimal minWeight, BigDecimal maxWeight) {
+        return new ProductFilterDomain(normalize(name), normalize(sku), normalize(category), minPrice, maxPrice, minWeight, maxWeight);
     }
 
     private ProductDomain toDomain(ProductRequest request) {
-        return ProductDomain.create(request.name(), request.sku(), request.description(), request.category(), request.price(), request.stock(), request.weightKg());
+        return ProductDomain.create(request.name(), request.sku(), request.description(), request.category(),
+                request.price(), request.stock(), request.weightKg());
+    }
+
+    private String  normalize(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 
     private PageQuery page(Pageable pageable) {

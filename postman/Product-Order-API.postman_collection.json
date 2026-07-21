@@ -7,11 +7,50 @@
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "keycloakUrl", "value": "http://localhost:8081" },
+    { "key": "keycloakClientId", "value": "product-order-api" },
+    { "key": "keycloakClientSecret", "value": "product-order-api-local-secret" },
     { "key": "jwt", "value": "COLE_SEU_JWT_AQUI" },
+    { "key": "idempotencyKey", "value": "order-create-001" },
     { "key": "productId", "value": "1" },
     { "key": "orderId", "value": "1" }
   ],
   "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Generate JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const token = pm.response.json().access_token;",
+                  "pm.test('access_token returned', () => pm.expect(token).to.be.a('string').and.not.empty);",
+                  "pm.collectionVariables.set('jwt', token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type", "value": "client_credentials", "type": "text" },
+                { "key": "client_id", "value": "{{keycloakClientId}}", "type": "text" },
+                { "key": "client_secret", "value": "{{keycloakClientSecret}}", "type": "text" }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/product-order/protocol/openid-connect/token"
+          },
+          "response": []
+        }
+      ]
+    },
     {
       "name": "Health",
       "item": [
@@ -66,11 +105,11 @@
           "response": []
         },
         {
-          "name": "Search products",
+          "name": "Filter products",
           "request": {
             "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{jwt}}", "type": "string" }] },
             "method": "GET",
-            "url": "{{baseUrl}}/api/v1/products/search?q=mouse&page=0&size=20"
+            "url": "{{baseUrl}}/api/v1/products?name=mouse&category=Perif%C3%A9ricos&minPrice=50&maxPrice=200&minWeight=0.050&maxWeight=1.000&page=0&size=20"
           },
           "response": []
         },
@@ -103,7 +142,7 @@
           "request": {
             "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{jwt}}", "type": "string" }] },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" }],
             "body": { "mode": "raw", "raw": "{\n  \"items\": [\n    { \"productId\": {{productId}}, \"quantity\": 2 }\n  ]\n}" },
             "url": "{{baseUrl}}/api/v1/orders"
           },

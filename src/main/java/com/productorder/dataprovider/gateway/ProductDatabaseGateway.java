@@ -1,12 +1,14 @@
 package com.productorder.dataprovider.gateway;
 
 import com.productorder.core.domain.product.ProductDomain;
+import com.productorder.core.domain.product.ProductFilterDomain;
 import com.productorder.core.gateway.PageQuery;
 import com.productorder.core.gateway.PageResult;
 import com.productorder.core.gateway.ProductGateway;
 import com.productorder.dataprovider.entity.ProductEntity;
 import com.productorder.dataprovider.mapper.ProductEntityMapper;
 import com.productorder.dataprovider.repository.ProductJpaRepository;
+import com.productorder.dataprovider.repository.ProductSpecification;
 
 import java.util.Optional;
 
@@ -44,12 +46,16 @@ public class ProductDatabaseGateway implements ProductGateway {
         return repository.findActiveByIdForUpdate(id).map(mapper::toDomain);
     }
 
-    public PageResult<ProductDomain> findActive(PageQuery q) {
-        return page(repository.findAllByActiveTrue(page(q)));
+    public Optional<ProductDomain> findByIdForUpdate(Long id) {
+        return repository.findByIdForUpdate(id).map(mapper::toDomain);
     }
 
-    public PageResult<ProductDomain> searchActive(String query, PageQuery q) {
-        return page(repository.searchActive(query, page(q)));
+    public PageResult<ProductDomain> findActive(ProductFilterDomain filter, PageQuery pageQuery) {
+        Pageable pageable = page(pageQuery);
+        if (filter.isEmpty()) {
+            return page(repository.findAllByActiveTrue(pageable));
+        }
+        return page(repository.findAll(ProductSpecification.from(filter), pageable));
     }
 
     private Pageable page(PageQuery pageQuery) {

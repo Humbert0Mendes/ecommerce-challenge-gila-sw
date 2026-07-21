@@ -14,5 +14,19 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.0
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      JAVA_OPTS_KC_HEAP: -XX:MaxRAMPercentage=65
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import:ro
+      - keycloak-data:/opt/keycloak/data
+    mem_limit: 768m
 volumes:
   postgres-data:
+  keycloak-data:

@@ -1,17 +1,17 @@
 package com.productorder.core.usecase.order;
 
 import com.productorder.core.domain.order.OrderDomain;
+import com.productorder.core.domain.order.OrderIdempotencyDomain;
 import com.productorder.core.domain.order.OrderItemDomain;
-import com.productorder.core.domain.product.ProductDomain;
-import com.productorder.core.exception.BusinessRuleException;
+import com.productorder.core.domain.payment.PaymentResultDomain;
 import com.productorder.core.exception.NotFoundException;
+import com.productorder.core.exception.PaymentProcessingException;
+import com.productorder.core.gateway.OrderIdempotencyGateway;
+import com.productorder.core.gateway.PaymentGateway;
 import com.productorder.core.gateway.PageQuery;
 import com.productorder.core.gateway.PageResult;
 import com.productorder.core.gateway.OrderGateway;
 import com.productorder.core.gateway.ProductGateway;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,23 +19,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class OrderUseCase extends AbstractOrderUseCase {
 
-    public OrderUseCase(OrderGateway orders, ProductGateway products) {
+    private final OrderPaymentProcessor paymentProcessor;
+    private final PaymentGateway paymentGateway;
+    private final OrderIdempotencyGateway idempotencyGateway;
+
+    public OrderUseCase(OrderGateway orders, ProductGateway products, OrderPaymentProcessor paymentProcessor, PaymentGateway paymentGateway, OrderIdempotencyGateway idempotencyGateway) {
         super(orders, products);
+        this.paymentProcessor = paymentProcessor;
+        this.paymentGateway = paymentGateway;
+        this.idempotencyGateway = idempotencyGateway;
     }
 
-    @Transactional
-    public OrderDomain create(OrderDomain orderDomainCommand) {
-        Map<Long, Integer> q = new LinkedHashMap<>();
-        orderDomainCommand.getItems().forEach(i -> q.merge(i.productId(), i.quantity(), Integer::sum));
-        OrderDomain orderDomain = OrderDomain.pending();
-        q.forEach((id, n) -> {
-            ProductDomain productDomain = products.findActiveByIdForUpdate(id).orElseThrow(() -> new NotFoundException("Product with id " + id + " not found"));
-            if (productDomain.getStock() < n) throw new BusinessRuleException("Stock insufficient");
-            productDomain.decreaseStock(n);
-            products.save(productDomain);
-            orderDomain.addItem(new OrderItemDomain(id, n, productDomain.getPrice()));
-        });
-        return orders.save(orderDomain);
+    public OrderDomain create(OrderDomain order, OrderIdempotencyDomain idempotency) {
+        return idempotencyGateway.execute(idempotency, fingerprint(order), () -> processPayment(order));
     }
 
     @Transactional(readOnly = true)
@@ -46,5 +42,29 @@ public class OrderUseCase extends AbstractOrderUseCase {
     @Transactional(readOnly = true)
     public PageResult<OrderDomain> list(PageQuery q) {
         return orders.findAll(q);
+    }
+
+    private OrderDomain processPayment(OrderDomain draft) {
+        var order = paymentProcessor.createAndReserve(draft);
+        try {
+            var processingOrder = paymentProcessor.startProcessing(order.getId());
+            PaymentResultDomain payment = paymentGateway.process(processingOrder);
+            if (!payment.approved()) {
+                throw new PaymentProcessingException(payment.reason());
+            }
+            return paymentProcessor.confirm(processingOrder.getId());
+        } catch (RuntimeException exception) {
+            paymentProcessor.declineAndRestore(order.getId());
+            throw exception;
+        }
+    }
+
+    private String fingerprint(OrderDomain order) {
+        return order.getItems().stream()
+                .collect(java.util.stream.Collectors.groupingBy(OrderItemDomain::productId, java.util.TreeMap::new, java.util.stream.Collectors.summingInt(OrderItemDomain::quantity)))
+                .entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + ":" + entry.getValue())
+                .collect(java.util.stream.Collectors.joining("|"));
     }
 }

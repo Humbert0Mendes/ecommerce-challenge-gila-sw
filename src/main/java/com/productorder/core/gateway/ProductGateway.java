@@ -1,6 +1,7 @@
 package com.productorder.core.gateway;
 
 import com.productorder.core.domain.product.ProductDomain;
+import com.productorder.core.domain.product.ProductFilterDomain;
 
 import java.util.Optional;
 
@@ -13,7 +14,7 @@ public interface ProductGateway {
 
     Optional<ProductDomain> findActiveByIdForUpdate(Long id);
 
-    PageResult<ProductDomain> findActive(PageQuery page);
+    Optional<ProductDomain> findByIdForUpdate(Long id);
 
-    PageResult<ProductDomain> searchActive(String query, PageQuery page);
+    PageResult<ProductDomain> findActive(ProductFilterDomain filter, PageQuery page);
 }

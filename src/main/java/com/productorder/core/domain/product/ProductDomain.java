@@ -57,6 +57,10 @@ public class ProductDomain {
         stock -= quantity;
     }
 
+    public void increaseStock(int quantity) {
+        stock += quantity;
+    }
+
     public Long getId() {
         return id;
     }

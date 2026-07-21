@@ -9,8 +9,10 @@ import com.productorder.entrypoint.api.facade.ProductImportFacade;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 
+import java.math.BigDecimal;
 import java.net.URI;
 
 import org.springframework.data.domain.Page;
@@ -51,13 +53,17 @@ public class ProductController {
     }
 
     @GetMapping
-    public Page<ProductResponse> list(@PageableDefault(size = 20) Pageable pageable) {
-        return facade.list(pageable);
-    }
-
-    @GetMapping("/search")
-    public Page<ProductResponse> search(@RequestParam @Size(min = 1, max = 100) String q, @PageableDefault(size = 20) Pageable pageable) {
-        return facade.search(q, pageable);
+    @Operation(summary = "Lista produtos aplicando filtros opcionais")
+    public Page<ProductResponse> list(
+            @RequestParam(required = false) @Size(max = 255) String name,
+            @RequestParam(required = false) @Size(max = 20) String sku,
+            @RequestParam(required = false) @Size(max = 100) String category,
+            @RequestParam(required = false) @DecimalMin("0.00") BigDecimal minPrice,
+            @RequestParam(required = false) @DecimalMin("0.00") BigDecimal maxPrice,
+            @RequestParam(required = false) @DecimalMin("0.000") BigDecimal minWeight,
+            @RequestParam(required = false) @DecimalMin("0.000") BigDecimal maxWeight,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return facade.list(name, sku, category, minPrice, maxPrice, minWeight, maxWeight, pageable);
     }
 
     @PostMapping(value = "/import", consumes = "multipart/form-data")

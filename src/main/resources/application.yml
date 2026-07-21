@@ -25,6 +25,11 @@ management:
 app:
   security:
     audience: ${JWT_AUDIENCE:product-order-api}
+  idempotency:
+    ttl: ${IDEMPOTENCY_TTL:PT24H}
+  payment:
+    fake:
+      decline: ${FAKE_PAYMENT_DECLINE:false}
 
 springdoc:
   swagger-ui:

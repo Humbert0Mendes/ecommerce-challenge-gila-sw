@@ -35,7 +35,19 @@
             <plugin><groupId>org.springframework.boot</groupId><artifactId>spring-boot-maven-plugin</artifactId></plugin>
             <plugin>
                 <groupId>org.pitest</groupId><artifactId>pitest-maven</artifactId><version>1.19.1</version>
-                <configuration><targetClasses><param>com.productorder.*.application.*</param><param>com.productorder.shared.validation.*</param></targetClasses><mutationThreshold>80</mutationThreshold></configuration>
+                <configuration>
+                    <targetClasses>
+                        <param>com.productorder.core.usecase.*</param>
+                        <param>com.productorder.core.domain.order.*</param>
+                        <param>com.productorder.core.domain.product.ProductFilterDomain</param>
+                        <param>com.productorder.dataprovider.csv.*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>com.productorder.core.*</param>
+                        <param>com.productorder.dataprovider.csv.*</param>
+                    </targetTests>
+                    <mutationThreshold>80</mutationThreshold>
+                </configuration>
                 <dependencies><dependency><groupId>org.pitest</groupId><artifactId>pitest-junit5-plugin</artifactId><version>1.2.2</version></dependency></dependencies>
             </plugin>
         </plugins>
