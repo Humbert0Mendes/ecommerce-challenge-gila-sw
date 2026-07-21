@@ -8,9 +8,9 @@
         <relativePath/>
     </parent>
     <groupId>com.productorder</groupId>
-    <artifactId>product-order-api</artifactId>
+    <artifactId>productDomain-orderDomain-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>product-order-api</name>
+    <name>productDomain-orderDomain-api</name>
     <description>API de gestão de produtos e pedidos</description>
     <properties><java.version>21</java.version></properties>
     <dependencies>
@@ -20,6 +20,7 @@
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-security</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-oauth2-resource-server</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-actuator</artifactId></dependency>
+        <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></dependency>
         <dependency><groupId>org.flywaydb</groupId><artifactId>flyway-core</artifactId></dependency>
         <dependency><groupId>org.flywaydb</groupId><artifactId>flyway-database-postgresql</artifactId></dependency>
         <dependency><groupId>org.postgresql</groupId><artifactId>postgresql</artifactId><scope>runtime</scope></dependency>

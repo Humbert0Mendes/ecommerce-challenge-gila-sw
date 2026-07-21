@@ -14,7 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
 @Testcontainers
-class ProductOrderApiApplicationIT {
+class ProductDomainOrderDomainApiApplicationIT {
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
