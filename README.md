@@ -1,68 +1,56 @@
 # Product Order API
 
-Backend REST para produtos e pedidos, desenvolvido com Java 21, Spring Boot, PostgreSQL e Flyway.
+REST backend for managing products and orders, developed with Java 21, Spring Boot, PostgreSQL, and Flyway.
 
-## Pré-requisitos
+## Prerequisites
 
 - Java 21
-- Docker Desktop em execução
+- Docker Desktop running
 
-## Executar localmente
+## Run Locally
 
 ```powershell
 docker compose up -d
 mvn spring-boot:run
 ```
 
-A API inicia em `http://localhost:8080`; o Swagger UI fica em `http://localhost:8080/swagger-ui.html`.
+The API starts at `http://localhost:8080`. The Swagger UI is available at `http://localhost:8080/swagger-ui.html`.
 
-## Autenticação
+## Authentication
 
-Os endpoints de negócio exigem Bearer JWT. Configure `JWT_ISSUER_URI`, `JWT_JWK_SET_URI` e `JWT_AUDIENCE` para o provedor de identidade usado no ambiente. O endpoint de saúde (`/actuator/health`) e a documentação OpenAPI são públicos.
+Business endpoints require a Bearer JWT. Configure `JWT_ISSUER_URI`, `JWT_JWK_SET_URI`, and `JWT_AUDIENCE` for the identity provider used in your environment.
 
-## Pagamentos e idempotÃªncia
+The health endpoint (`/actuator/health`) is publicly available.
 
-`POST /api/v1/orders` exige o header `Idempotency-Key`. A chave Ã© vinculada ao sujeito do JWT e, em repetiÃ§Ãµes com o mesmo payload, retorna o mesmo pedido sem reservar estoque ou processar o pagamento novamente. Reutilizar a chave com outro payload retorna `409 Conflict`.
+## Payment and idempotency
 
-O pagamento Ã© processado por um gateway fake local. Ele aprova por padrÃ£o; defina `FAKE_PAYMENT_DECLINE=true` para simular uma recusa e validar a devoluÃ§Ã£o do estoque e o status `DECLINED`.
+`POST /api/v1/orders` requires `Idempotency-Key`. The key is linked to the JWT subject, and when the request is repeated with the same payload, it returns the same order without reserving inventory or processing the payment again. Reusing the key with a different payload returns `409 Conflict`.
 
-## JWT local (Keycloak)
+The payment is processed through a fake payment gateway. By default, it is approved; set `FAKE_PAYMENT_DECLINE=true` to simulate a decline and validate the restocking with the `DECLINED` status.
 
-O `docker compose up -d` tambem inicia o Keycloak em `http://localhost:8081` e importa automaticamente o realm `product-order`. O client local `product-order-api` usa uma Service Account e ja inclui a audiencia exigida pela API.
+## Local JWT (Keycloak)
 
-Para obter um JWT de desenvolvimento:
+Running `docker compose up -d` also starts Keycloak at `http://localhost:8081` and automatically imports the `product-order` realm. The local `product-order-api` client uses a service account and already includes the audience required by the API.
 
-```powershell
-$token = Invoke-RestMethod `
-  -Method Post `
-  -Uri "http://localhost:8081/realms/product-order/protocol/openid-connect/token" `
-  -ContentType "application/x-www-form-urlencoded" `
-  -Body @{
-    grant_type = "client_credentials"
-    client_id = "product-order-api"
-    client_secret = "product-order-api-local-secret"
-  }
+To obtain a development JWT, import [the Postman collection](postman/Product-Order-API.postman_collection.json) and run the `Authentication > Generate JWT` request. The request stores the returned access token in the `jwt` collection variable, which is automatically used by the protected API requests.
 
-$token.access_token
-```
+The `admin/admin` credentials and the client secret included in the collection are for local development only.
 
-Use o valor retornado no header `Authorization: Bearer <token>`. As credenciais `admin/admin` e o client secret acima existem apenas para desenvolvimento local.
-
-## Testes
+## Tests
 
 ```powershell
 mvn test
 ```
 
-Os testes de integração com Testcontainers seguem a convenção `*IT` e devem ser executados em uma sessão com acesso ao Docker Engine:
+Integration tests use Testcontainers, follow the `*IT` convention, and require a running Docker Engine:
 
 ```powershell
 mvn verify -Pintegration
 ```
 
-## Rotas
+## Routes
 
-- `POST`, `GET`, `GET /{id}`, `PUT` e `DELETE /api/v1/products`
-- `GET /api/v1/products` aceita os filtros opcionais `name`, `sku`, `category`, `minPrice`, `maxPrice`, `minWeight` e `maxWeight`
-- `POST /api/v1/products/import` (`multipart/form-data`, campo `file`)
-- `POST`, `GET` e `GET /{id} /api/v1/orders`
+- `POST`, `GET`, `GET /{id}`, `PUT`, and `DELETE` for `/api/v1/products`
+- `GET /api/v1/products` accepts the optional filters `name`, `sku`, `category`, `minPrice`, `maxPrice`, `minWeight`, and `maxWeight`
+- `POST /api/v1/products/import` (`multipart/form-data`, `file` part)
+- `POST`, `GET`, and `GET /{id}` for `/api/v1/orders` (`POST` requires `Idempotency-Key`)
