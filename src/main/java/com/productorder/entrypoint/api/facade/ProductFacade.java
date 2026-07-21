@@ -5,15 +5,13 @@ import com.productorder.core.domain.product.ProductFilterDomain;
 import com.productorder.core.gateway.PageQuery;
 import com.productorder.core.gateway.PageResult;
 import com.productorder.core.usecase.product.ProductUseCase;
+import com.productorder.entrypoint.api.dto.PageResponse;
 import com.productorder.entrypoint.api.dto.product.ProductRequest;
 import com.productorder.entrypoint.api.dto.product.ProductResponse;
 
 import java.math.BigDecimal;
 
 import org.jspecify.annotations.NonNull;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +38,7 @@ public class ProductFacade {
         useCase.delete(id);
     }
 
-    public Page<ProductResponse> list(String name, String sku, String category, BigDecimal minPrice, BigDecimal maxPrice,
+    public PageResponse<ProductResponse> list(String name, String sku, String category, BigDecimal minPrice, BigDecimal maxPrice,
                                       BigDecimal minWeight, BigDecimal maxWeight, Pageable pageable) {
         ProductFilterDomain filter = buildProductFilterDomain(name, sku, category, minPrice, maxPrice, minWeight, maxWeight);
         return responsePage(useCase.list(filter, page(pageable)));
@@ -64,7 +62,7 @@ public class ProductFacade {
         return new PageQuery(pageable.getPageNumber(), Math.min(pageable.getPageSize(), 100), pageable.getSort().isSorted() ? pageable.getSort().iterator().next().getProperty() : "name", pageable.getSort().isSorted() ? pageable.getSort().iterator().next().getDirection().name() : "ASC");
     }
 
-    private Page<ProductResponse> responsePage(PageResult<ProductDomain> page) {
-        return new PageImpl<>(page.content().stream().map(ProductResponse::from).toList(), PageRequest.of(page.page(), page.size()), page.totalElements());
+    private PageResponse<ProductResponse> responsePage(PageResult<ProductDomain> page) {
+        return new PageResponse<>(page.content().stream().map(ProductResponse::from).toList(), page.page(), page.size(), page.totalElements(), page.totalPages());
     }
 }

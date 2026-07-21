@@ -2,6 +2,7 @@ package com.productorder.entrypoint.api.controller;
 
 import com.productorder.entrypoint.api.dto.order.OrderCreateRequest;
 import com.productorder.entrypoint.api.dto.order.OrderResponse;
+import com.productorder.entrypoint.api.dto.PageResponse;
 import com.productorder.entrypoint.api.facade.OrderFacade;
 
 import jakarta.validation.Valid;
@@ -9,7 +10,6 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.net.URI;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +38,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public Page<OrderResponse> list(@PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+    public PageResponse<OrderResponse> list(@PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
         return facade.list(pageable);
     }
 

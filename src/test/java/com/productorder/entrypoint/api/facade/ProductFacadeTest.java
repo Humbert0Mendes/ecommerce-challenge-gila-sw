@@ -9,6 +9,7 @@ import com.productorder.core.domain.product.ProductFilterDomain;
 import com.productorder.core.gateway.PageQuery;
 import com.productorder.core.gateway.PageResult;
 import com.productorder.core.usecase.product.ProductUseCase;
+import com.productorder.entrypoint.api.dto.PageResponse;
 import com.productorder.entrypoint.api.dto.product.ProductRequest;
 import com.productorder.entrypoint.api.dto.product.ProductResponse;
 
@@ -22,7 +23,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,12 +68,12 @@ class ProductFacadeTest {
         PageResult<ProductDomain> result = new PageResult<>(List.of(product), 0, 100, 1, 1);
         when(useCase.list(org.mockito.ArgumentMatchers.any(ProductFilterDomain.class), org.mockito.ArgumentMatchers.any(PageQuery.class))).thenReturn(result);
 
-        Page<ProductResponse> response = facade.list(" Mouse ", " ", " Perifericos ", new BigDecimal("10.00"), new BigDecimal("100.00"), null, null, PageRequest.of(0, 200));
+        PageResponse<ProductResponse> response = facade.list(" Mouse ", " ", " Perifericos ", new BigDecimal("10.00"), new BigDecimal("100.00"), null, null, PageRequest.of(0, 200));
 
         verify(useCase).list(filterCaptor.capture(), pageCaptor.capture());
         assertThat(filterCaptor.getValue()).isEqualTo(new ProductFilterDomain("Mouse", null, "Perifericos", new BigDecimal("10.00"), new BigDecimal("100.00"), null, null));
         assertThat(pageCaptor.getValue()).isEqualTo(new PageQuery(0, 100, "name", "ASC"));
-        assertThat(response.getContent()).extracting(ProductResponse::sku).containsExactly("MOUSE-001");
+        assertThat(response.content()).extracting(ProductResponse::sku).containsExactly("MOUSE-001");
     }
 
     private ProductRequest request() {

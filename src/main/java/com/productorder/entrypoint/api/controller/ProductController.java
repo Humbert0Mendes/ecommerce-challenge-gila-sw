@@ -1,6 +1,7 @@
 package com.productorder.entrypoint.api.controller;
 
 import com.productorder.entrypoint.api.dto.product.ImportResponse;
+import com.productorder.entrypoint.api.dto.PageResponse;
 import com.productorder.entrypoint.api.dto.product.ProductRequest;
 import com.productorder.entrypoint.api.dto.product.ProductResponse;
 import com.productorder.entrypoint.api.facade.ProductFacade;
@@ -15,7 +16,6 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.net.URI;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +54,7 @@ public class ProductController {
 
     @GetMapping
     @Operation(summary = "Lista produtos aplicando filtros opcionais")
-    public Page<ProductResponse> list(
+    public PageResponse<ProductResponse> list(
             @RequestParam(required = false) @Size(max = 255) String name,
             @RequestParam(required = false) @Size(max = 20) String sku,
             @RequestParam(required = false) @Size(max = 100) String category,

@@ -11,6 +11,7 @@ import com.productorder.core.domain.order.OrderStatusEnum;
 import com.productorder.core.gateway.PageQuery;
 import com.productorder.core.gateway.PageResult;
 import com.productorder.core.usecase.order.OrderUseCase;
+import com.productorder.entrypoint.api.dto.PageResponse;
 import com.productorder.entrypoint.api.dto.order.OrderCreateRequest;
 import com.productorder.entrypoint.api.dto.order.OrderItemRequest;
 import com.productorder.entrypoint.api.dto.order.OrderResponse;
@@ -25,7 +26,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,10 +66,10 @@ class OrderFacadeTest {
         PageResult<OrderDomain> result = new PageResult<>(List.of(OrderDomain.created()), 0, 100, 1, 1);
         when(useCase.list(org.mockito.ArgumentMatchers.any(PageQuery.class))).thenReturn(result);
 
-        Page<OrderResponse> response = facade.list(PageRequest.of(0, 200));
+        PageResponse<OrderResponse> response = facade.list(PageRequest.of(0, 200));
 
         verify(useCase).list(pageCaptor.capture());
         assertThat(pageCaptor.getValue()).isEqualTo(new PageQuery(0, 100, "createdAt", "DESC"));
-        assertThat(response.getTotalElements()).isOne();
+        assertThat(response.totalElements()).isOne();
     }
 }
