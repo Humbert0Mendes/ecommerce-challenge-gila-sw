@@ -11,12 +11,16 @@ import com.productorder.core.gateway.ProductGateway;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OrderPaymentProcessor extends AbstractOrderUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderPaymentProcessor.class);
 
     public OrderPaymentProcessor(OrderGateway orders, ProductGateway products) {
         super(orders, products);
@@ -59,7 +63,9 @@ public class OrderPaymentProcessor extends AbstractOrderUseCase {
     private void reserveProduct(OrderDomain order, Long productId, int quantity) {
         var product = products.findActiveByIdForUpdate(productId).orElseThrow(() -> new NotFoundException("Product with id " + productId));
         if (product.getStock() < quantity) {
-            throw new BusinessRuleException("Stock insufficient");
+            var messageError = String.format("Stock for product %s is less than the requested quantity %s", productId, quantity);
+            log.error(messageError);
+            throw new BusinessRuleException(messageError);
         }
         product.decreaseStock(quantity);
         products.save(product);
