@@ -1,9 +1,9 @@
 import api from "./api";
 import type { Order, Page } from "../types";
 export const ordersApi = {
-  list: (page = 0) =>
+  list: (params: { page?: number; id?: number; status?: string } = {}) =>
     api
-      .get<Page<Order>>("/api/v1/orders", { params: { page } })
+      .get<Page<Order>>("/api/v1/orders", { params })
       .then((r) => r.data),
   get: (id: number) =>
     api.get<Order>(`/api/v1/orders/${id}`).then((r) => r.data),

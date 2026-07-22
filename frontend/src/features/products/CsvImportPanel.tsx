@@ -1,0 +1,18 @@
+import { Close, CloudUpload, InsertDriveFile } from "@mui/icons-material";
+import { Button, CircularProgress } from "@mui/material";
+import { useState } from "react";
+import { useToast } from "../../hooks/useToast";
+import { productsApi } from "../../services/products";
+const CSV_IMPORT_MINIMUM_LOADING_TIME = 3000;
+const minimumDelay = (milliseconds: number) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+export function CsvImportPanel({ onDone, onCancel }: { onDone?: () => void; onCancel?: () => void }) {
+  const [file, setFile] = useState<File>(); const [preview, setPreview] = useState<string[]>([]); const [loading, setLoading] = useState(false); const [errors, setErrors] = useState<string[]>([]); const toast = useToast();
+  const select = async (candidate?: File) => { if (!candidate || loading) return; setFile(candidate); setErrors([]); setPreview((await candidate.text()).split(/\r?\n/).filter(Boolean).slice(0, 5)); };
+  const submit = async () => { if (!file || loading) return; setLoading(true); try { const [result] = await Promise.all([productsApi.importCsv(file), minimumDelay(CSV_IMPORT_MINIMUM_LOADING_TIME)]); const messages = result.errors.map((error) => error.message ?? error.reason ?? "Invalid row"); setErrors(messages); toast({ severity: messages.length ? "info" : "success", message: `${result.imported} product(s) imported.` }); setFile(undefined); setPreview([]); onDone?.(); } catch { setErrors(["Unable to import this file. Check the format and try again."]); toast({ severity: "error", message: "CSV import failed." }); } finally { setLoading(false); } };
+  return <div className="space-y-5" aria-busy={loading}>
+    <label className={`flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition ${loading ? "pointer-events-none opacity-60" : "border-base-300 bg-base-200 hover:border-primary"}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); void select(event.dataTransfer.files[0]); }}><CloudUpload className="mb-3 text-4xl text-primary" /><span className="font-semibold">{loading ? "Importing products..." : "Drag a CSV here or click to select one"}</span><span className="mt-1 text-sm text-base-content/70">Accepted format: .csv</span><input hidden disabled={loading} type="file" accept=".csv,text/csv" onChange={(event) => void select(event.target.files?.[0])} /></label>
+    {file && <div className="rounded-lg border border-base-300 bg-base-100 p-4"><div className="flex items-center justify-between gap-3"><div className="flex min-w-0 items-center gap-3"><InsertDriveFile color="primary" /><span className="truncate font-medium">{file.name}</span></div><Button disabled={loading} size="small" color="inherit" startIcon={<Close />} onClick={() => { setFile(undefined); setPreview([]); setErrors([]); }}>Remove</Button></div>{preview.length > 0 && <pre className="mt-4 overflow-x-auto rounded bg-base-200 p-3 text-left text-xs text-base-content/70">{preview.join("\n")}</pre>}</div>}
+    {errors.length > 0 && <div className="alert alert-error text-sm" aria-live="polite"><div><strong>Validation errors</strong><ul>{errors.map((error, index) => <li key={`${error}-${index}`}>{error}</li>)}</ul></div></div>}
+    <div className="flex justify-end gap-2"><Button disabled={loading} onClick={onCancel}>Cancel</Button><Button variant="contained" disabled={!file || loading} onClick={submit} startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <CloudUpload />}>{loading ? "Importing products..." : "Confirm import"}</Button></div>
+  </div>;
+}

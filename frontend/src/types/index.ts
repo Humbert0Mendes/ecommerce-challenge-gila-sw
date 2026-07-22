@@ -19,6 +19,7 @@ export type Page<T> = {
 export type CartItem = Product & { quantity: number };
 export type OrderItem = {
   productId: number;
+  productName?: string | null;
   quantity: number;
   unitPrice: number;
   subtotal: number;

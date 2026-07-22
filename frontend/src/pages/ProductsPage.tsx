@@ -1,170 +1,32 @@
-import { Add, UploadFile } from "@mui/icons-material";
-import {
-  Button,
-  CircularProgress,
-  IconButton,
-  Paper,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Add, Search, UploadFile } from "@mui/icons-material";
+import { Button, Chip, CircularProgress, InputAdornment, Paper, Stack, TextField, Typography } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { EmptyState } from "../components/EmptyState";
+import { ProductCard } from "../components/ProductCard";
+import { ProductPagination } from "../components/ProductPagination";
+import { useCart } from "../features/cart/CartContext";
+import { ImportDialog } from "../features/products/ImportDialog";
+import { ProductForm } from "../features/products/ProductForm";
+import { useDebouncedValue } from "../hooks/useDebouncedValue";
+import { useToast } from "../hooks/useToast";
 import { productsApi } from "../services/products";
 import type { Product, ProductInput } from "../types";
-import { ProductForm } from "../features/products/ProductForm";
-import { ImportDialog } from "../features/products/ImportDialog";
-import { useCart } from "../features/cart/CartContext";
-import { useToast } from "../hooks/useToast";
+
 export function ProductsPage() {
-  const [name, setName] = useState("");
-  const [editing, setEditing] = useState<Product | undefined>();
-  const [form, setForm] = useState(false);
-  const [importing, setImporting] = useState(false);
-  const queryClient = useQueryClient();
-  const toast = useToast();
-  const { add } = useCart();
-  const query = useQuery({
-    queryKey: ["products", name],
-    queryFn: () =>
-      productsApi.list({ name: name || undefined, page: 0, size: 20 }),
-  });
-  const refresh = () =>
-    queryClient.invalidateQueries({ queryKey: ["products"] });
-  const save = useMutation({
-    mutationFn: (data: ProductInput) =>
-      editing ? productsApi.update(editing.id, data) : productsApi.create(data),
-    onSuccess: () => {
-      refresh();
-      setForm(false);
-      toast({ severity: "success", message: "Produto salvo." });
-    },
-    onError: () =>
-      toast({
-        severity: "error",
-        message: "Não foi possível salvar. Verifique se o SKU já existe.",
-      }),
-  });
-  const remove = useMutation({
-    mutationFn: productsApi.remove,
-    onSuccess: () => {
-      refresh();
-      toast({ severity: "success", message: "Produto removido." });
-    },
-  });
-  return (
-    <>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        justifyContent="space-between"
-        spacing={2}
-        sx={{ mb: 2 }}
-      >
-        <Typography variant="h4">Produtos</Typography>
-        <Stack direction="row" spacing={1}>
-          <Button startIcon={<UploadFile />} onClick={() => setImporting(true)}>
-            Importar CSV
-          </Button>
-          <Button
-            startIcon={<Add />}
-            variant="contained"
-            onClick={() => {
-              setEditing(undefined);
-              setForm(true);
-            }}
-          >
-            Novo produto
-          </Button>
-        </Stack>
-      </Stack>
-      <TextField
-        label="Filtrar por nome"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        sx={{ mb: 2 }}
-      />
-      {query.isLoading ? (
-        <CircularProgress />
-      ) : query.isError ? (
-        <Typography color="error">
-          Erro de rede. Tente recarregar a página.
-        </Typography>
-      ) : (
-        <Paper>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Nome</TableCell>
-                <TableCell>SKU</TableCell>
-                <TableCell>Categoria</TableCell>
-                <TableCell>Preço</TableCell>
-                <TableCell>Estoque</TableCell>
-                <TableCell>Ações</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {query.data?.content.length ? (
-                query.data.content.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>{product.name}</TableCell>
-                    <TableCell>{product.sku}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell>{product.price}</TableCell>
-                    <TableCell>{product.stock}</TableCell>
-                    <TableCell>
-                      <Button
-                        disabled={!product.stock}
-                        onClick={() => {
-                          add(product);
-                          toast({
-                            severity: "success",
-                            message: "Adicionado ao carrinho.",
-                          });
-                        }}
-                      >
-                        Adicionar
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setEditing(product);
-                          setForm(true);
-                        }}
-                      >
-                        Editar
-                      </Button>
-                      <Button
-                        color="error"
-                        onClick={() => remove.mutate(product.id)}
-                      >
-                        Excluir
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6}>Nenhum produto encontrado.</TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </Paper>
-      )}
-      {form && (
-        <ProductForm
-          product={editing}
-          onClose={() => setForm(false)}
-          onSave={(data) => save.mutate(data)}
-        />
-      )}
-      {importing && (
-        <ImportDialog onClose={() => setImporting(false)} onDone={refresh} />
-      )}
-    </>
-  );
+  const [name, setName] = useState(""); const [category, setCategory] = useState<string>(); const [page, setPage] = useState(0); const [editing, setEditing] = useState<Product>(); const [form, setForm] = useState(false); const [importing, setImporting] = useState(false);
+  const debounced = useDebouncedValue(name); const client = useQueryClient(); const toast = useToast(); const { add } = useCart();
+  const query = useQuery({ queryKey: ["products", debounced, category, page], queryFn: () => productsApi.list({ name: debounced || undefined, category, page, size: 12 }) });
+  const categories = useQuery({ queryKey: ["product-categories"], queryFn: productsApi.categories });
+  const refresh = () => client.invalidateQueries({ queryKey: ["products"] });
+  const save = useMutation({ mutationFn: (data: ProductInput) => editing ? productsApi.update(editing.id, data) : productsApi.create(data), onSuccess: () => { refresh(); setForm(false); toast({ severity: "success", message: "Product saved." }); } });
+  const remove = useMutation({ mutationFn: productsApi.remove, onSuccess: () => { refresh(); toast({ severity: "success", message: "Product removed." }); } });
+  const resetPage = (setter: () => void) => { setter(); setPage(0); };
+  return <div>
+    <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" gap={2} sx={{ mb: 3 }}><div><Typography variant="h4">Products</Typography><Typography color="text.secondary">Catalog, inventory, and pricing in one place.</Typography></div><Stack direction="row" gap={1}><Button startIcon={<UploadFile />} onClick={() => setImporting(true)}>Import CSV</Button><Button variant="contained" startIcon={<Add />} onClick={() => { setEditing(undefined); setForm(true); }}>New Product</Button></Stack></Stack>
+    <Paper className="mb-4 p-4"><TextField fullWidth label="Search products" value={name} onChange={(event) => resetPage(() => setName(event.target.value))} InputProps={{ startAdornment: <InputAdornment position="start"><Search /></InputAdornment> }} /></Paper>
+    <div className="mb-5 flex flex-wrap gap-2"><Chip label="All" color={!category ? "primary" : "default"} onClick={() => resetPage(() => setCategory(undefined))} />{categories.data?.map((item) => <Chip key={item} label={item} color={category === item ? "primary" : "default"} variant={category === item ? "filled" : "outlined"} onClick={() => resetPage(() => setCategory(item))} />)}</div>
+    {query.isLoading ? <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 6 }, (_, i) => <div key={i} className="skeleton h-80" />)}</div> : query.isError ? <EmptyState title="Unable to load products" description="Try again in a few moments." action={<Button variant="contained" onClick={() => query.refetch()}>Try again</Button>} /> : !query.data?.content.length ? <EmptyState title="No products found" description="Change your search or select another category." /> : <><div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">{query.data.content.map((product) => <ProductCard key={product.id} product={product} onAdd={() => { add(product); toast({ severity: "success", message: "Product added to cart." }); }} onEdit={() => { setEditing(product); setForm(true); }} onRemove={() => remove.mutate(product.id)} />)}</div><ProductPagination page={query.data.page} totalPages={query.data.totalPages} onPage={setPage} /></>}
+    {form && <ProductForm product={editing} onClose={() => setForm(false)} onSave={(data) => save.mutate(data)} />}{importing && <ImportDialog onClose={() => setImporting(false)} onDone={refresh} />}
+  </div>;
 }

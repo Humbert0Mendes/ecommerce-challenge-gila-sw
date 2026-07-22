@@ -5,6 +5,7 @@ import { CartPage } from "./pages/CartPage";
 import { OrdersPage } from "./pages/OrdersPage";
 import { OrderDetailPage } from "./pages/OrderDetailPage";
 import { LoginPage } from "./pages/LoginPage";
+import { CsvImportPage } from "./pages/CsvImportPage";
 import keycloak from "./services/auth";
 function Protected({ children }: { children: React.ReactNode }) {
   return keycloak.authenticated ? (
@@ -25,6 +26,7 @@ export default function App() {
         }
       >
         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products/import" element={<CsvImportPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/orders" element={<OrdersPage />} />
         <Route path="/orders/:id" element={<OrderDetailPage />} />

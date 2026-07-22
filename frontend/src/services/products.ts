@@ -10,6 +10,8 @@ export const productsApi = {
   update: (id: number, data: ProductInput) =>
     api.put<Product>(`/api/v1/products/${id}`, data).then((r) => r.data),
   remove: (id: number) => api.delete(`/api/v1/products/${id}`),
+  categories: () =>
+    api.get<string[]>("/api/v1/products/categories").then((r) => r.data),
   importCsv: (file: File) => {
     const body = new FormData();
     body.append("file", file);
