@@ -12,13 +12,13 @@ import org.springframework.stereotype.Component;
 public class OrderEntityMapper {
     public OrderDomain toDomain(OrderEntity orderEntity) {
         return new OrderDomain(orderEntity.getId(), orderEntity.getCreatedAt(), orderEntity.getStatus(), orderEntity.getItems().stream().map(i
-                -> new OrderItemDomain(i.getProduct().getId(), i.getQuantity(), i.getUnitPrice())).toList());
+                -> new OrderItemDomain(i.getProduct().getId(), i.getProductName(), i.getQuantity(), i.getUnitPrice())).toList());
     }
 
     public OrderEntity toEntity(OrderDomain orderDomain, java.util.function.Function<Long, ProductEntity> product) {
         OrderEntity orderEntity = new OrderEntity(orderDomain.getStatus(), orderDomain.total());
         orderDomain.getItems().forEach(i
-                -> orderEntity.addItem(new OrderItemEntity(product.apply(i.productId()), i.quantity(), i.unitPrice())));
+                -> orderEntity.addItem(new OrderItemEntity(product.apply(i.productId()), i.productName(), i.quantity(), i.unitPrice())));
         return orderEntity;
     }
 

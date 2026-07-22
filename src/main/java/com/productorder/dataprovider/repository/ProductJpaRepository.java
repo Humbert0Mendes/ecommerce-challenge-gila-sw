@@ -3,6 +3,7 @@ package com.productorder.dataprovider.repository;
 import com.productorder.dataprovider.entity.ProductEntity;
 
 import java.util.Optional;
+import java.util.List;
 
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,9 @@ public interface ProductJpaRepository extends JpaRepository<ProductEntity, Long>
     Optional<ProductEntity> findByIdAndActiveTrue(Long id);
 
     Page<ProductEntity> findAllByActiveTrue(Pageable pageable);
+
+    @Query("select distinct p.category from ProductEntity p where p.active = true order by p.category")
+    List<String> findDistinctActiveCategories();
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from ProductEntity p where p.id=:id and p.active=true")

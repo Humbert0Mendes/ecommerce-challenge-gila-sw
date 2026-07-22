@@ -1,6 +1,7 @@
 package com.productorder.core.usecase.order;
 
 import com.productorder.core.domain.order.OrderDomain;
+import com.productorder.core.domain.order.OrderFilterDomain;
 import com.productorder.core.domain.order.OrderIdempotencyDomain;
 import com.productorder.core.domain.order.OrderItemDomain;
 import com.productorder.core.domain.payment.PaymentResultDomain;
@@ -38,6 +39,11 @@ public class OrderUseCase extends AbstractOrderUseCase {
     @Transactional(readOnly = true)
     public OrderDomain get(Long id) {
         return orders.findById(id).orElseThrow(() -> new NotFoundException("Order with id " + id + " not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResult<OrderDomain> list(OrderFilterDomain filter, PageQuery q) {
+        return orders.findAll(filter, q);
     }
 
     @Transactional(readOnly = true)

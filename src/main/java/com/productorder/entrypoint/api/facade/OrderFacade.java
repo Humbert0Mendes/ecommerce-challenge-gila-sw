@@ -1,6 +1,8 @@
 package com.productorder.entrypoint.api.facade;
 
 import com.productorder.core.domain.order.OrderDomain;
+import com.productorder.core.domain.order.OrderFilterDomain;
+import com.productorder.core.domain.order.OrderStatusEnum;
 import com.productorder.core.domain.order.OrderIdempotencyDomain;
 import com.productorder.core.domain.order.OrderItemDomain;
 import com.productorder.core.gateway.PageQuery;
@@ -29,6 +31,11 @@ public class OrderFacade {
 
     public OrderResponse get(Long id) {
         return OrderResponse.from(useCase.get(id));
+    }
+
+    public PageResponse<OrderResponse> list(Long id, OrderStatusEnum status, Pageable pageable) {
+        PageResult<OrderDomain> page = useCase.list(new OrderFilterDomain(id, status), new PageQuery(pageable.getPageNumber(), Math.min(pageable.getPageSize(), 100), "createdAt", "DESC"));
+        return new PageResponse<>(page.content().stream().map(OrderResponse::from).toList(), page.page(), page.size(), page.totalElements(), page.totalPages());
     }
 
     public PageResponse<OrderResponse> list(Pageable pageable) {

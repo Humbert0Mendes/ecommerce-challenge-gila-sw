@@ -1,6 +1,7 @@
 package com.productorder.dataprovider.gateway;
 
 import com.productorder.core.domain.order.OrderDomain;
+import com.productorder.core.domain.order.OrderFilterDomain;
 import com.productorder.core.gateway.OrderGateway;
 import com.productorder.core.gateway.PageQuery;
 import com.productorder.core.gateway.PageResult;
@@ -41,8 +42,8 @@ public class OrderDatabaseGateway implements OrderGateway {
         return orders.findById(id).map(mapper::toDomain);
     }
 
-    public PageResult<OrderDomain> findAll(PageQuery pageQuery) {
-        Page<OrderEntity> p = orders.findAllByOrderByCreatedAtDesc(PageRequest.of(pageQuery.page(), pageQuery.size()));
+    public PageResult<OrderDomain> findAll(OrderFilterDomain filter, PageQuery pageQuery) {
+        Page<OrderEntity> p = orders.findAllFiltered(filter.id(), filter.status(), PageRequest.of(pageQuery.page(), pageQuery.size()));
         return new PageResult<>(p.getContent().stream().map(mapper::toDomain).toList(), p.getNumber(), p.getSize(), p.getTotalElements(), p.getTotalPages());
     }
 }

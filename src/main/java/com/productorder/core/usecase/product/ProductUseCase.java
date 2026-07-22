@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 @Service
 public class ProductUseCase extends AbstractProductUseCase {
@@ -40,6 +41,11 @@ public class ProductUseCase extends AbstractProductUseCase {
     @Transactional(readOnly = true)
     public PageResult<ProductDomain> list(ProductFilterDomain filter, PageQuery page) {
         return products.findActive(filter, page);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> categories() {
+        return products.findActiveCategories();
     }
 
     @Transactional

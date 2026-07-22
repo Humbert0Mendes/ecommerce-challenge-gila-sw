@@ -69,7 +69,7 @@ public class OrderPaymentProcessor extends AbstractOrderUseCase {
         }
         product.decreaseStock(quantity);
         products.save(product);
-        order.addItem(new OrderItemDomain(productId, quantity, product.getPrice()));
+        order.addItem(new OrderItemDomain(productId, product.getName(), quantity, product.getPrice()));
     }
 
     private void restoreProduct(OrderItemDomain item) {

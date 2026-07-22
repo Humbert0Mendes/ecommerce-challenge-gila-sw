@@ -4,6 +4,7 @@ import com.productorder.core.domain.product.ProductDomain;
 import com.productorder.core.domain.product.ProductFilterDomain;
 
 import java.util.Optional;
+import java.util.List;
 
 public interface ProductGateway {
     ProductDomain save(ProductDomain productDomain);
@@ -17,4 +18,6 @@ public interface ProductGateway {
     Optional<ProductDomain> findByIdForUpdate(Long id);
 
     PageResult<ProductDomain> findActive(ProductFilterDomain filter, PageQuery page);
+
+    List<String> findActiveCategories();
 }

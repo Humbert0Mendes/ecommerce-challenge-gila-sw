@@ -22,6 +22,10 @@ public interface OrderJpaRepository extends JpaRepository<OrderEntity, Long> {
     @EntityGraph(attributePaths = {"items", "items.product"})
     Page<OrderEntity> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
+    @EntityGraph(attributePaths = {"items", "items.product"})
+    @Query("select o from OrderEntity o where (:id is null or o.id = :id) and (:status is null or o.status = :status) order by o.createdAt desc")
+    Page<OrderEntity> findAllFiltered(@Param("id") Long id, @Param("status") OrderStatusEnum status, Pageable pageable);
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE OrderEntity orderEntity SET orderEntity.status = :status WHERE orderEntity.id = :id")
     void updateStatus(@Param("id") Long id, @Param("status") OrderStatusEnum status);

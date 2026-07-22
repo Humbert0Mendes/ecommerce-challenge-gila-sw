@@ -1,5 +1,6 @@
 package com.productorder.entrypoint.api.controller;
 
+import com.productorder.core.domain.order.OrderStatusEnum;
 import com.productorder.entrypoint.api.dto.order.OrderCreateRequest;
 import com.productorder.entrypoint.api.dto.order.OrderResponse;
 import com.productorder.entrypoint.api.dto.PageResponse;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,8 +40,8 @@ public class OrderController {
     }
 
     @GetMapping
-    public PageResponse<OrderResponse> list(@PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
-        return facade.list(pageable);
+    public PageResponse<OrderResponse> list(@RequestParam(required = false) Long id, @RequestParam(required = false) OrderStatusEnum status, @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+        return facade.list(id, status, pageable);
     }
 
     @GetMapping("/{id}")

@@ -11,6 +11,7 @@ import com.productorder.dataprovider.repository.ProductJpaRepository;
 import com.productorder.dataprovider.repository.ProductSpecification;
 
 import java.util.Optional;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -56,6 +57,10 @@ public class ProductDatabaseGateway implements ProductGateway {
             return page(repository.findAllByActiveTrue(pageable));
         }
         return page(repository.findAll(ProductSpecification.from(filter), pageable));
+    }
+
+    public List<String> findActiveCategories() {
+        return repository.findDistinctActiveCategories();
     }
 
     private Pageable page(PageQuery pageQuery) {

@@ -28,12 +28,15 @@ public class OrderItemEntity {
     private int quantity;
     @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
+    @Column(name = "product_name", nullable = false)
+    private String productName;
 
     protected OrderItemEntity() {
     }
 
-    public OrderItemEntity(ProductEntity product, int quantity, BigDecimal unitPrice) {
+    public OrderItemEntity(ProductEntity product, String productName, int quantity, BigDecimal unitPrice) {
         this.product = product;
+        this.productName = productName;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
     }
@@ -52,5 +55,9 @@ public class OrderItemEntity {
 
     public BigDecimal getUnitPrice() {
         return unitPrice;
+    }
+
+    public String getProductName() {
+        return productName;
     }
 }

@@ -75,13 +75,13 @@ class DatabaseGatewayIT {
     void shouldPersistOrderWithItemAndReturnItFromGateway() {
         ProductDomain product = products.save(product("Mouse sem fio", "MOUSE-001", "Perifericos", "99.90", "0.120"));
         OrderDomain draft = OrderDomain.created();
-        draft.addItem(new OrderItemDomain(product.getId(), 2, product.getPrice()));
+        draft.addItem(new OrderItemDomain(product.getId(), product.getName(), 2, product.getPrice()));
 
         OrderDomain saved = orders.create(draft);
         OrderDomain found = orders.findById(saved.getId()).orElseThrow();
         PageResult<OrderDomain> page = orders.findAll(new PageQuery(0, 20, "createdAt", "DESC"));
 
-        assertThat(found.getItems()).containsExactly(new OrderItemDomain(product.getId(), 2, new BigDecimal("99.90")));
+        assertThat(found.getItems()).containsExactly(new OrderItemDomain(product.getId(), "Mouse sem fio", 2, new BigDecimal("99.90")));
         assertThat(found.total()).isEqualByComparingTo("199.80");
         assertThat(page.content()).extracting(OrderDomain::getId).containsExactly(saved.getId());
     }

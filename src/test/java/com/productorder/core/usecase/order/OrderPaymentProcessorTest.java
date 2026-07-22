@@ -54,7 +54,7 @@ class OrderPaymentProcessorTest {
         OrderDomain created = processor.createAndReserve(draft);
 
         assertThat(created.getStatus()).isEqualTo(OrderStatusEnum.CREATED);
-        assertThat(created.getItems()).containsExactly(new OrderItemDomain(1L, 2, new BigDecimal("19.90")));
+        assertThat(created.getItems()).containsExactly(new OrderItemDomain(1L, "Mouse", 2, new BigDecimal("19.90")));
         assertThat(product.getStock()).isOne();
         verify(products).save(product);
     }

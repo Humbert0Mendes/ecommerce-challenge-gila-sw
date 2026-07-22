@@ -1,6 +1,7 @@
 package com.productorder.core.gateway;
 
 import com.productorder.core.domain.order.OrderDomain;
+import com.productorder.core.domain.order.OrderFilterDomain;
 
 import java.util.Optional;
 
@@ -11,5 +12,9 @@ public interface OrderGateway {
 
     Optional<OrderDomain> findById(Long id);
 
-    PageResult<OrderDomain> findAll(PageQuery page);
+    PageResult<OrderDomain> findAll(OrderFilterDomain filter, PageQuery page);
+
+    default PageResult<OrderDomain> findAll(PageQuery page) {
+        return findAll(new OrderFilterDomain(null, null), page);
+    }
 }

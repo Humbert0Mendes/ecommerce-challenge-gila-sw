@@ -66,6 +66,12 @@ public class ProductController {
         return facade.list(name, sku, category, minPrice, maxPrice, minWeight, maxWeight, pageable);
     }
 
+    @GetMapping("/categories")
+    @Operation(summary = "Lista as categorias de produtos ativas")
+    public java.util.List<String> categories() {
+        return facade.categories();
+    }
+
     @PostMapping(value = "/import", consumes = "multipart/form-data")
     public ImportResponse importCsv(@RequestPart("file") MultipartFile file) {
         return importFacade.importFile(file);

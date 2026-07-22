@@ -10,6 +10,7 @@ import com.productorder.entrypoint.api.dto.product.ProductRequest;
 import com.productorder.entrypoint.api.dto.product.ProductResponse;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +43,10 @@ public class ProductFacade {
                                       BigDecimal minWeight, BigDecimal maxWeight, Pageable pageable) {
         var filter = buildProductFilterDomain(name, sku, category, minPrice, maxPrice, minWeight, maxWeight);
         return responsePage(useCase.list(filter, page(pageable)));
+    }
+
+    public List<String> categories() {
+        return useCase.categories();
     }
 
     private @NonNull ProductFilterDomain buildProductFilterDomain(String name, String sku, String category,
