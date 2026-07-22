@@ -27,6 +27,33 @@
           }
         }
       ]
+    },
+    {
+      "clientId": "product-order-web",
+      "name": "Product Order Web - Local",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:5173/*"],
+      "webOrigins": ["http://localhost:5173"],
+      "protocolMappers": [
+        {
+          "name": "product-order-api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": { "included.client.audience": "product-order-api", "access.token.claim": "true", "id.token.claim": "false", "introspection.token.claim": "true" }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "frontend-user",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "frontend-password", "temporary": false }]
     }
   ]
 }
