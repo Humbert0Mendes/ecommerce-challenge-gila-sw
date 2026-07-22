@@ -1,0 +1,6 @@
+import { CircularProgress, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+import { ordersApi } from "../services/orders";
+import { formatCurrency } from "../utils/formatters";
+export function OrderDetailPage() { const id = Number(useParams().id); const query = useQuery({ queryKey: ["orders", id], queryFn: () => ordersApi.get(id) }); if (query.isLoading) return <CircularProgress aria-label="Loading order" />; if (query.isError || !query.data) return <Typography color="error">Order not found.</Typography>; const order = query.data; return <><Typography variant="h4">Order #{order.id}</Typography><Typography sx={{ mb: 2 }}>Status: {order.status} · Total: {formatCurrency(order.total)}</Typography><Paper><Table><TableHead><TableRow><TableCell>Product</TableCell><TableCell>Quantity</TableCell><TableCell>Unit Price</TableCell><TableCell>Subtotal</TableCell></TableRow></TableHead><TableBody>{order.items.map((item) => <TableRow key={item.productId}><TableCell>{item.productName ?? `Product #${item.productId}`}</TableCell><TableCell>{item.quantity}</TableCell><TableCell>{formatCurrency(item.unitPrice)}</TableCell><TableCell>{formatCurrency(item.subtotal)}</TableCell></TableRow>)}</TableBody></Table></Paper></>; }
