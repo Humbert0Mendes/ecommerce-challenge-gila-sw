@@ -57,9 +57,9 @@ class DatabaseGatewayIT {
 
     @Test
     void shouldPersistAndFilterOnlyActiveProducts() {
-        ProductDomain mouse = products.save(product("Mouse sem fio", "MOUSE-001", "Perifericos", "99.90", "0.120"));
+        var mouse = products.save(product("Mouse sem fio", "MOUSE-001", "Perifericos", "99.90", "0.120"));
         products.save(product("Teclado", "KEYBOARD-001", "Perifericos", "199.90", "0.700"));
-        ProductDomain inactive = product("Mouse antigo", "MOUSE-OLD", "Perifericos", "49.90", "0.100");
+        var inactive = product("Mouse antigo", "MOUSE-OLD", "Perifericos", "49.90", "0.100");
         inactive.deactivate();
         products.save(inactive);
 
@@ -73,12 +73,12 @@ class DatabaseGatewayIT {
 
     @Test
     void shouldPersistOrderWithItemAndReturnItFromGateway() {
-        ProductDomain product = products.save(product("Mouse sem fio", "MOUSE-001", "Perifericos", "99.90", "0.120"));
-        OrderDomain draft = OrderDomain.created();
+        var product = products.save(product("Mouse sem fio", "MOUSE-001", "Perifericos", "99.90", "0.120"));
+        var draft = OrderDomain.created();
         draft.addItem(new OrderItemDomain(product.getId(), product.getName(), 2, product.getPrice()));
 
-        OrderDomain saved = orders.create(draft);
-        OrderDomain found = orders.findById(saved.getId()).orElseThrow();
+        var saved = orders.create(draft);
+        var found = orders.findById(saved.getId()).orElseThrow();
         PageResult<OrderDomain> page = orders.findAll(new PageQuery(0, 20, "createdAt", "DESC"));
 
         assertThat(found.getItems()).containsExactly(new OrderItemDomain(product.getId(), "Mouse sem fio", 2, new BigDecimal("99.90")));

@@ -18,15 +18,15 @@ class LocalOrderIdempotencyGatewayTest {
 
     @Test
     void shouldReturnCachedOrderWithoutExecutingActionTwice() {
-        OrderIdempotencyDomain idempotency = new OrderIdempotencyDomain("tester", "key-1");
-        OrderDomain order = OrderDomain.created();
-        AtomicInteger executions = new AtomicInteger();
+        var idempotency = new OrderIdempotencyDomain("tester", "key-1");
+        var order = OrderDomain.created();
+        var executions = new AtomicInteger();
 
-        OrderDomain first = gateway.execute(idempotency, "1:2", () -> {
+        var first = gateway.execute(idempotency, "1:2", () -> {
             executions.incrementAndGet();
             return order;
         });
-        OrderDomain duplicate = gateway.execute(idempotency, "1:2", () -> {
+        var duplicate = gateway.execute(idempotency, "1:2", () -> {
             executions.incrementAndGet();
             return OrderDomain.created();
         });
@@ -38,7 +38,7 @@ class LocalOrderIdempotencyGatewayTest {
 
     @Test
     void shouldRejectSameKeyWithDifferentRequestFingerprint() {
-        OrderIdempotencyDomain idempotency = new OrderIdempotencyDomain("tester", "key-1");
+        var idempotency = new OrderIdempotencyDomain("tester", "key-1");
         gateway.execute(idempotency, "1:2", OrderDomain::created);
 
         assertThatThrownBy(() -> gateway.execute(idempotency, "1:3", OrderDomain::created))
@@ -47,7 +47,7 @@ class LocalOrderIdempotencyGatewayTest {
 
     @Test
     void shouldReuseFailureWithoutExecutingActionAgain() {
-        OrderIdempotencyDomain idempotency = new OrderIdempotencyDomain("tester", "key-1");
+        var idempotency = new OrderIdempotencyDomain("tester", "key-1");
         AtomicInteger executions = new AtomicInteger();
 
         assertThatThrownBy(() -> gateway.execute(idempotency, "1:2", () -> {

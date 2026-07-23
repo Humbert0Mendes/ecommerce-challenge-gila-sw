@@ -150,6 +150,16 @@
           "name": "Create order",
           "event": [
             {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('order accepted for asynchronous payment', () => pm.response.to.have.status(202));",
+                  "pm.test('order starts processing', () => pm.expect(pm.response.json().status).to.eql('PROCESSING'));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
               "listen": "prerequest",
               "script": {
                 "exec": [

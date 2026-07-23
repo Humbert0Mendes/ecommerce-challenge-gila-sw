@@ -51,6 +51,16 @@ public class ProductDatabaseGateway implements ProductGateway {
         return repository.findByIdForUpdate(id).map(mapper::toDomain);
     }
 
+    public boolean reserveStock(Long productId, int quantity) {
+        return repository.reserveStock(productId, quantity) == 1;
+    }
+
+    public void releaseStock(Long productId, int quantity) {
+        if (repository.releaseStock(productId, quantity) != 1) {
+            throw new IllegalStateException("Product " + productId + " was not found while releasing stock");
+        }
+    }
+
     public PageResult<ProductDomain> findActive(ProductFilterDomain filter, PageQuery pageQuery) {
         Pageable pageable = page(pageQuery);
         if (filter.isEmpty()) {

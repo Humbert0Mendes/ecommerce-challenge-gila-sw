@@ -9,6 +9,11 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:product_order}
+    password: ${RABBITMQ_PASSWORD:product_order}
   security:
     oauth2:
       resourceserver:
@@ -30,6 +35,15 @@ app:
   payment:
     fake:
       decline: ${FAKE_PAYMENT_DECLINE:false}
+  rabbitmq:
+    payment-exchange: ${PAYMENT_EXCHANGE:ecommerce.payment.exchange}
+    payment-requested-queue: ${PAYMENT_REQUESTED_QUEUE:payment.requested.queue}
+    payment-requested-routing-key: ${PAYMENT_REQUESTED_ROUTING_KEY:payment.requested}
+    payment-delay-queue: ${PAYMENT_DELAY_QUEUE:payment.requested.delay.queue}
+    payment-delay-routing-key: ${PAYMENT_DELAY_ROUTING_KEY:payment.requested.delay}
+    payment-delay-ms: ${PAYMENT_DELAY_MS:30000}
+    payment-requested-dlq: ${PAYMENT_REQUESTED_DLQ:payment.requested.dlq}
+    payment-requested-dlq-routing-key: ${PAYMENT_REQUESTED_DLQ_ROUTING_KEY:payment.requested.dlq}
 
 springdoc:
   swagger-ui:

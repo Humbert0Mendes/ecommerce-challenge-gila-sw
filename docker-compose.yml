@@ -27,6 +27,19 @@ services:
       - ./keycloak/import:/opt/keycloak/data/import:ro
       - keycloak-data:/opt/keycloak/data
     mem_limit: 768m
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: product_order
+      RABBITMQ_DEFAULT_PASS: product_order
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 volumes:
   postgres-data:
   keycloak-data:

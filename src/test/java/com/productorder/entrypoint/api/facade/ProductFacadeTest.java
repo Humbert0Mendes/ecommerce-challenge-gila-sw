@@ -49,11 +49,11 @@ class ProductFacadeTest {
 
     @Test
     void shouldMapProductRequestToDomainWhenCreatingProduct() {
-        ProductRequest request = request();
-        ProductDomain saved = product(1L, "Mouse", "MOUSE-001");
+        var request = request();
+        var saved = product(1L, "Mouse", "MOUSE-001");
         when(useCase.create(org.mockito.ArgumentMatchers.any(ProductDomain.class))).thenReturn(saved);
 
-        ProductResponse response = facade.create(request);
+        var response = facade.create(request);
 
         verify(useCase).create(productCaptor.capture());
         ProductDomain captured = productCaptor.getValue();
@@ -64,7 +64,7 @@ class ProductFacadeTest {
 
     @Test
     void shouldNormalizeFiltersAndMapProductPage() {
-        ProductDomain product = product(1L, "Mouse", "MOUSE-001");
+        var product = product(1L, "Mouse", "MOUSE-001");
         PageResult<ProductDomain> result = new PageResult<>(List.of(product), 0, 100, 1, 1);
         when(useCase.list(org.mockito.ArgumentMatchers.any(ProductFilterDomain.class), org.mockito.ArgumentMatchers.any(PageQuery.class))).thenReturn(result);
 

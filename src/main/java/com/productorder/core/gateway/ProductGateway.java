@@ -17,6 +17,10 @@ public interface ProductGateway {
 
     Optional<ProductDomain> findByIdForUpdate(Long id);
 
+    boolean reserveStock(Long productId, int quantity);
+
+    void releaseStock(Long productId, int quantity);
+
     PageResult<ProductDomain> findActive(ProductFilterDomain filter, PageQuery page);
 
     List<String> findActiveCategories();

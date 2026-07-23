@@ -28,15 +28,21 @@ public class OrderDomain {
     }
 
     public void startProcessing() {
+        if (status != OrderStatusEnum.CREATED)
+            throw new IllegalStateException("Only a created order can start processing");
         status = OrderStatusEnum.PROCESSING;
     }
 
     public void confirm() {
+        if (status != OrderStatusEnum.PROCESSING)
+            throw new IllegalStateException("Only a processing order can be confirmed");
         status = OrderStatusEnum.CONFIRMED;
     }
 
-    public void decline() {
-        status = OrderStatusEnum.DECLINED;
+    public void paymentFailed() {
+        if (status != OrderStatusEnum.PROCESSING)
+            throw new IllegalStateException("Only a processing order can fail payment");
+        status = OrderStatusEnum.PAYMENT_FAILED;
     }
 
     public Long getId() {
