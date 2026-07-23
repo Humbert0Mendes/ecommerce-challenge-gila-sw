@@ -97,6 +97,12 @@ Direct publishing after the database commit is intentional for this challenge: i
 
 For stricter production delivery guarantees, the recommended evolution is the Transactional Outbox Pattern. It is deliberately not implemented here.
 
+## Version Control Workflow
+
+The project was developed using Git with focused branches for frontend, backend, messaging, documentation, and bug fixes. This kept changes isolated, easier to review, and safer to integrate.
+
+The `main` branch is protected. Every branch is reviewed through a pull request before being merged into `main`.
+
 ## Local JWT (Keycloak)
 
 Running `docker compose up -d` also starts Keycloak at `http://localhost:8081` and automatically imports the `product-order` realm. The local `product-order-api` client uses a service account and already includes the audience required by the API.
