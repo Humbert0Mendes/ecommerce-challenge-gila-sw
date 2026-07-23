@@ -1,6 +1,6 @@
 # Product Order API
 
-REST backend for managing products and orders, developed with Java 21, Spring Boot, PostgreSQL, and Flyway.
+REST backend for managing products and orders, developed with Java 21, Spring Boot, PostgreSQL, RabbitMq and Flyway.
 
 ## Prerequisites
 
@@ -14,7 +14,26 @@ docker compose up -d
 mvn spring-boot:run
 ```
 
+In a second terminal, start the frontend:
+
+```powershell
+cd frontend
+npm.cmd install
+npm.cmd run dev
+```
+
+The frontend is available at `http://localhost:5173`.
+
 The API starts at `http://localhost:8080`. The Swagger UI is available at `http://localhost:8080/swagger-ui.html`.
+
+The example CSV file provided for the challenge was downloaded on July 18, 2026.
+
+## Routes
+
+- `POST`, `GET`, `GET /{id}`, `PUT`, and `DELETE` for `/api/v1/products`
+- `GET /api/v1/products` accepts the optional filters `name`, `sku`, `category`, `minPrice`, `maxPrice`, `minWeight`, and `maxWeight`
+- `POST /api/v1/products/import` (`multipart/form-data`, `file` part)
+- `POST`, `GET`, and `GET /{id}` for `/api/v1/orders` (`POST` requires `Idempotency-Key`)
 
 ## Authentication
 
@@ -58,6 +77,16 @@ The fake gateway is deterministic: payments are approved by default; set `FAKE_P
 
 RabbitMQ can deliver messages more than once. Each payment event has an `eventId`, persisted with a unique constraint in `processed_events`; duplicates are ignored. The current order status is a second protection against invalid or repeated processing.
 
+## Why RabbitMQ?
+
+RabbitMQ was intentionally selected as the asynchronous messaging solution for this take-home project.
+
+The goal was to demonstrate a clear and production-oriented asynchronous payment workflow while keeping the solution small, understandable, and easy to run locally. RabbitMQ fits this scope well because it provides queues, acknowledgments, retries, and dead-letter handling without requiring a separate distributed-streaming platform.
+
+Kafka was not selected because this use case does not require high-throughput event streaming, long-term event retention, replay, or multiple independent consumers. AWS-managed services were also not selected because the project is designed to run locally with Docker and should not depend on cloud credentials or external infrastructure.
+
+This is a context-driven decision, not a general rule: Kafka or AWS services such as SQS could be more appropriate for different scale, operational, or platform requirements.
+
 ## RabbitMQ Management
 
 Docker Compose starts RabbitMQ Management at `http://localhost:15672` with the local credentials `product_order` / `product_order`.
@@ -67,6 +96,12 @@ Docker Compose starts RabbitMQ Management at `http://localhost:15672` with the l
 Direct publishing after the database commit is intentional for this challenge: it keeps the design small and makes the asynchronous boundary explicit. It does **not** provide atomicity between PostgreSQL and RabbitMQ. If publication fails after the commit, the order remains `PROCESSING`, the error is propagated and logged, and it can be diagnosed or reprocessed manually.
 
 For stricter production delivery guarantees, the recommended evolution is the Transactional Outbox Pattern. It is deliberately not implemented here.
+
+## Version Control Workflow
+
+The project was developed using Git with focused branches for frontend, backend, messaging, documentation, and bug fixes. This kept changes isolated, easier to review, and safer to integrate.
+
+The `main` branch is protected. Every branch is reviewed through a pull request before being merged into `main`.
 
 ## Local JWT (Keycloak)
 
@@ -88,11 +123,3 @@ Integration tests use Testcontainers, follow the `*IT` convention, and require a
 mvn verify -Pintegration
 ```
 
-## Routes
-
-- `POST`, `GET`, `GET /{id}`, `PUT`, and `DELETE` for `/api/v1/products`
-- `GET /api/v1/products` accepts the optional filters `name`, `sku`, `category`, `minPrice`, `maxPrice`, `minWeight`, and `maxWeight`
-- `POST /api/v1/products/import` (`multipart/form-data`, `file` part)
-- `POST`, `GET`, and `GET /{id}` for `/api/v1/orders` (`POST` requires `Idempotency-Key`)
-
-The example CSV file provided for the challenge was downloaded on July 18, 2026.
