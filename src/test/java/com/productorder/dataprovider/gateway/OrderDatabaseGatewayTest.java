@@ -46,7 +46,7 @@ class OrderDatabaseGatewayTest {
 
     @Test
     void shouldCreateNewEntityWhenOrderHasNoIdentifier() {
-        OrderDomain draft = new OrderDomain(null, null, OrderStatusEnum.CREATED, List.of());
+        var draft = new OrderDomain(null, null, OrderStatusEnum.CREATED, List.of());
         when(mapper.toEntity(eq(draft), any())).thenReturn(entity);
         when(orders.save(entity)).thenReturn(entity);
         when(mapper.toDomain(entity)).thenReturn(draft);
@@ -60,9 +60,9 @@ class OrderDatabaseGatewayTest {
 
     @Test
     void shouldUpdateExistingEntityWhenOrderHasIdentifier() {
-        OrderDomain order = new OrderDomain(1L, null, OrderStatusEnum.PROCESSING, List.of());
+        var order = new OrderDomain(1L, null, OrderStatusEnum.PROCESSING, List.of());
 
-        OrderDomain result = gateway.update(order);
+        var result = gateway.update(order);
 
         assertThat(result).isSameAs(order);
         verify(orders).updateStatus(1L, OrderStatusEnum.PROCESSING);

@@ -11,9 +11,9 @@ class FakePaymentGatewayTest {
 
     @Test
     void shouldApprovePaymentByDefault() {
-        FakePaymentGateway gateway = new FakePaymentGateway(false);
+        var gateway = new FakePaymentGateway(false);
 
-        PaymentResultDomain result = gateway.process(OrderDomain.created());
+        var result = gateway.process(OrderDomain.created());
 
         assertThat(result.approved()).isTrue();
         assertThat(result.reason()).isNull();
@@ -21,7 +21,7 @@ class FakePaymentGatewayTest {
 
     @Test
     void shouldDeclinePaymentWhenConfigured() {
-        FakePaymentGateway gateway = new FakePaymentGateway(true);
+        var gateway = new FakePaymentGateway(true);
 
         PaymentResultDomain result = gateway.process(OrderDomain.created());
 

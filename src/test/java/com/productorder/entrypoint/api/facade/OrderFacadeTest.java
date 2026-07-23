@@ -49,11 +49,11 @@ class OrderFacadeTest {
 
     @Test
     void shouldMapOrderRequestToCreatedDomain() {
-        OrderCreateRequest request = new OrderCreateRequest(List.of(new OrderItemRequest(1L, 2)));
-        OrderDomain saved = new OrderDomain(1L, null, OrderStatusEnum.CONFIRMED, List.of(new OrderItemDomain(1L, 2, new BigDecimal("19.90"))));
+        var request = new OrderCreateRequest(List.of(new OrderItemRequest(1L, 2)));
+        var saved = new OrderDomain(1L, null, OrderStatusEnum.CONFIRMED, List.of(new OrderItemDomain(1L, 2, new BigDecimal("19.90"))));
         when(useCase.create(org.mockito.ArgumentMatchers.any(OrderDomain.class), org.mockito.ArgumentMatchers.any(OrderIdempotencyDomain.class))).thenReturn(saved);
 
-        OrderResponse response = facade.create(request, "key-1", "tester");
+        var response = facade.create(request, "key-1", "tester");
 
         verify(useCase).create(orderCaptor.capture(), org.mockito.ArgumentMatchers.eq(new OrderIdempotencyDomain("tester", "key-1")));
         assertThat(orderCaptor.getValue().getStatus()).isEqualTo(OrderStatusEnum.CREATED);

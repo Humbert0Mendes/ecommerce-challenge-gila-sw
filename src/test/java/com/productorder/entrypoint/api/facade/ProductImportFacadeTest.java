@@ -10,8 +10,6 @@ import com.productorder.core.domain.product.ProductImportResult;
 import com.productorder.core.domain.product.ProductImportRow;
 import com.productorder.core.usecase.product.ProductUseCase;
 import com.productorder.dataprovider.csv.ProductCsvParser;
-import com.productorder.entrypoint.api.dto.product.ImportResponse;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
@@ -45,13 +43,14 @@ class ProductImportFacadeTest {
     @Test
     void shouldParseFileImportRowsAndMapImportReport() throws IOException {
         List<ProductImportRow> rows = List.of(new ProductImportRow(2, "Mouse", "MOUSE-001", "Mouse sem fio", "Perifericos", "99.90", "10", "0.120"));
-        ProductImportResult result = new ProductImportResult(1, 1, List.of(new ProductImportIssue(3, "price", "invalid price")));
+        var result = new ProductImportResult(1, 1, List.of(new ProductImportIssue(3, "price", "invalid price")));
+
         when(file.isEmpty()).thenReturn(false);
         when(file.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[0]));
         when(parser.parse(org.mockito.ArgumentMatchers.any())).thenReturn(rows);
         when(useCase.importProducts(rows)).thenReturn(result);
 
-        ImportResponse response = facade.importFile(file);
+        var response = facade.importFile(file);
 
         verify(useCase).importProducts(rows);
         assertThat(response.imported()).isEqualTo(1);

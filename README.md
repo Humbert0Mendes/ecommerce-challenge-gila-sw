@@ -22,11 +22,51 @@ Business endpoints require a Bearer JWT. Configure `JWT_ISSUER_URI`, `JWT_JWK_SE
 
 The health endpoint (`/actuator/health`) is publicly available.
 
-## Payment and idempotency
+## Asynchronous payment flow
 
-`POST /api/v1/orders` requires `Idempotency-Key`. The key is linked to the JWT subject, and when the request is repeated with the same payload, it returns the same order without reserving inventory or processing the payment again. Reusing the key with a different payload returns `409 Conflict`.
+`POST /api/v1/orders` requires `Idempotency-Key` and returns `202 Accepted` with `Location: /api/v1/orders/{id}`. The response contains the order ID and `PROCESSING` status.
 
-The payment is processed through a fake payment gateway. By default, it is approved; set `FAKE_PAYMENT_DECLINE=true` to simulate a decline and validate the restocking with the `DECLINED` status.
+Within one database transaction, the API creates the order, atomically reserves inventory, and changes the order to `PROCESSING`. After that transaction commits, it publishes a `PaymentRequested` message to RabbitMQ. The `PaymentProcessor` is only a messaging adapter; it delegates the business rules to `ProcessPaymentUseCase`.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Database
+    participant RabbitMQ
+    participant PaymentProcessor
+    participant PaymentGateway
+
+    Client->>API: POST /orders
+    API->>Database: Create PROCESSING order and reserve stock
+    Database-->>API: Commit
+    API->>RabbitMQ: Publish PaymentRequested
+    API-->>Client: 202 Accepted
+    RabbitMQ->>PaymentProcessor: PaymentRequested
+    PaymentProcessor->>PaymentGateway: Process payment
+    PaymentGateway-->>PaymentProcessor: Approved or declined
+    alt Approved
+        PaymentProcessor->>Database: Set CONFIRMED
+    else Declined
+        PaymentProcessor->>Database: Set PAYMENT_FAILED and release stock
+    end
+```
+
+Only one queue is consumed for processing: `payment.requested.queue`, bound to `ecommerce.payment.exchange` with routing key `payment.requested`. Before reaching it, messages spend 30 seconds in the technical `payment.requested.delay.queue`, using RabbitMQ TTL and dead-letter routing; this avoids requiring the delayed-message plugin. No approval or failure events are published because the consumer updates the order directly in this modular monolith. The dead-letter queue is `payment.requested.dlq`.
+
+The fake gateway is deterministic: payments are approved by default; set `FAKE_PAYMENT_DECLINE=true` to simulate a business decline. A decline is not retried and moves the order to `PAYMENT_FAILED`, restoring the reserved stock in the same transaction. Technical failures are propagated to RabbitMQ, retried three times, and rejected to the DLQ after the retry limit.
+
+RabbitMQ can deliver messages more than once. Each payment event has an `eventId`, persisted with a unique constraint in `processed_events`; duplicates are ignored. The current order status is a second protection against invalid or repeated processing.
+
+## RabbitMQ Management
+
+Docker Compose starts RabbitMQ Management at `http://localhost:15672` with the local credentials `product_order` / `product_order`.
+
+## Production considerations
+
+Direct publishing after the database commit is intentional for this challenge: it keeps the design small and makes the asynchronous boundary explicit. It does **not** provide atomicity between PostgreSQL and RabbitMQ. If publication fails after the commit, the order remains `PROCESSING`, the error is propagated and logged, and it can be diagnosed or reprocessed manually.
+
+For stricter production delivery guarantees, the recommended evolution is the Transactional Outbox Pattern. It is deliberately not implemented here.
 
 ## Local JWT (Keycloak)
 

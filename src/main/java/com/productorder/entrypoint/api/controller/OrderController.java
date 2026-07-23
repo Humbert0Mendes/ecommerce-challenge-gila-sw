@@ -2,6 +2,7 @@ package com.productorder.entrypoint.api.controller;
 
 import com.productorder.core.domain.order.OrderStatusEnum;
 import com.productorder.entrypoint.api.dto.order.OrderCreateRequest;
+import com.productorder.entrypoint.api.dto.order.OrderAcceptedResponse;
 import com.productorder.entrypoint.api.dto.order.OrderResponse;
 import com.productorder.entrypoint.api.dto.PageResponse;
 import com.productorder.entrypoint.api.facade.OrderFacade;
@@ -34,9 +35,9 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<OrderResponse> create(@RequestHeader("Idempotency-Key") @NotBlank String idempotencyKey, Authentication authentication, @Valid @RequestBody OrderCreateRequest request) {
+    public ResponseEntity<OrderAcceptedResponse> create(@RequestHeader("Idempotency-Key") @NotBlank String idempotencyKey, Authentication authentication, @Valid @RequestBody OrderCreateRequest request) {
         var response = facade.create(request, idempotencyKey, authentication.getName());
-        return ResponseEntity.created(URI.create("/api/v1/orders/" + response.id())).body(response);
+        return ResponseEntity.accepted().location(URI.create("/api/v1/orders/" + response.id())).body(new OrderAcceptedResponse(response.id(), response.status()));
     }
 
     @GetMapping
