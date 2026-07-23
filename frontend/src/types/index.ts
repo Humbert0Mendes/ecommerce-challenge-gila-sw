@@ -17,6 +17,11 @@ export type Page<T> = {
   totalPages: number;
 };
 export type CartItem = Product & { quantity: number };
+export type OrderStatus =
+  | "CREATED"
+  | "PROCESSING"
+  | "CONFIRMED"
+  | "PAYMENT_FAILED";
 export type OrderItem = {
   productId: number;
   productName?: string | null;
@@ -27,9 +32,13 @@ export type OrderItem = {
 export type Order = {
   id: number;
   createdAt: string;
-  status: "APPROVED" | "DECLINED" | string;
+  status: OrderStatus | string;
   items: OrderItem[];
   total: number;
+};
+export type OrderAccepted = {
+  orderId: number;
+  status: OrderStatus | string;
 };
 export type ImportResult = {
   imported: number;

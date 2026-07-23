@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import type { Order } from "../types";
 import { formatCurrency, formatDateTime } from "../utils/formatters";
 import { OrderItemsTable } from "./OrderItemsTable";
+import { OrderStatusBadge } from "./OrderStatusBadge";
 
 export function OrderDetailsModal({ order, onClose, isLoading = false }: { order: Order | null; onClose: () => void; isLoading?: boolean }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -22,7 +23,7 @@ export function OrderDetailsModal({ order, onClose, isLoading = false }: { order
         </div>
         <div className="space-y-5 p-5">
           <div className="grid gap-3 text-sm sm:grid-cols-2">
-            <div className="rounded-box bg-base-200 p-3"><p className="text-xs text-base-content/60">Status</p><p className="mt-1 font-semibold">{order.status}</p></div>
+            <div className="rounded-box bg-base-200 p-3"><p className="text-xs text-base-content/60">Status</p><div className="mt-1"><OrderStatusBadge status={order.status} /></div></div>
             <div className="rounded-box bg-base-200 p-3"><p className="text-xs text-base-content/60">Order Total</p><p className="mt-1 font-semibold">{formatCurrency(order.total)}</p></div>
           </div>
           <div><h3 className="mb-2 font-semibold">Items</h3>{isLoading ? <span className="loading loading-spinner loading-sm" aria-label="Loading order details" /> : <OrderItemsTable items={order.items} />}</div>

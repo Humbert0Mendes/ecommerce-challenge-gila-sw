@@ -11,6 +11,7 @@ import { ProductForm } from "../features/products/ProductForm";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { useToast } from "../hooks/useToast";
 import { productsApi } from "../services/products";
+import { invalidateProductQueries } from "../services/productQueries";
 import type { Product, ProductInput } from "../types";
 
 export function ProductsPage() {
@@ -18,7 +19,7 @@ export function ProductsPage() {
   const debounced = useDebouncedValue(name); const client = useQueryClient(); const toast = useToast(); const { add } = useCart();
   const query = useQuery({ queryKey: ["products", debounced, category, page], queryFn: () => productsApi.list({ name: debounced || undefined, category, page, size: 12 }) });
   const categories = useQuery({ queryKey: ["product-categories"], queryFn: productsApi.categories });
-  const refresh = () => client.invalidateQueries({ queryKey: ["products"] });
+  const refresh = () => invalidateProductQueries(client);
   const save = useMutation({ mutationFn: (data: ProductInput) => editing ? productsApi.update(editing.id, data) : productsApi.create(data), onSuccess: () => { refresh(); setForm(false); toast({ severity: "success", message: "Product saved." }); } });
   const remove = useMutation({ mutationFn: productsApi.remove, onSuccess: () => { refresh(); toast({ severity: "success", message: "Product removed." }); } });
   const resetPage = (setter: () => void) => { setter(); setPage(0); };
