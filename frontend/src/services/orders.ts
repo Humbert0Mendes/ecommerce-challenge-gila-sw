@@ -1,5 +1,5 @@
 import api from "./api";
-import type { Order, Page } from "../types";
+import type { Order, OrderAccepted, Page } from "../types";
 export const ordersApi = {
   list: (params: { page?: number; id?: number; status?: string } = {}) =>
     api
@@ -12,7 +12,7 @@ export const ordersApi = {
     idempotencyKey: string,
   ) =>
     api
-      .post<Order>(
+      .post<OrderAccepted>(
         "/api/v1/orders",
         { items },
         { headers: { "Idempotency-Key": idempotencyKey } },
